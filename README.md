@@ -19,10 +19,10 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The plan so far:
 
-[x] create the project and the repository
-[ ] write a parser
-    [ ] choose a parser (yacc? Pigeon/PEG?)
-    [ ] define all the tokens
-    [ ] write a good lexer
-    [ ] write the parser (transforming to what - an AST?)
+- [x] create the project and the repository
+- [ ] write a parser
+    - [ ] choose a parser (yacc? Pigeon/PEG?)
+    - [ ] define all the tokens
+    - [ ] write a good lexer
+    - [ ] write the parser (transforming to what - an AST?)
 
