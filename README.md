@@ -21,8 +21,15 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 - [x] create the project and the repository
 - [ ] write a parser
-    - [ ] choose a parser (yacc? Pigeon/PEG?)
+    - [x] choose a parser (Pigeon/PEG)
     - [ ] define all the tokens
-    - [ ] write a good lexer
     - [ ] write the parser (transforming to what - an AST?)
 
+## The worklog
+
+* Nov 02 (2.5 hr) - Looked into PEG. I wrote a a calculator (not by copying anyone else's - wanted to try it myself. It's nice because it doesn't need a lexer (unlike yacc). It's also easier to write the grammar. I'm going to run with it, but I'm not sure yet about a couple of things:
+    * How best to handle syntax errors (writing them into the grammar is the best way to give good error handling, but it really bloats the grammar).
+    * How to format the grammar. The nature of go means that a lot of interface{} and []interface{} are getting passed around, so it's not nice to embed much code in the grammar itself. Indentation (like YACC) can get kind of ugly. I played with nested embedded functions which might work out.
+    * What the grammar should generate. It might be best to have it build an AST because then I can get all the interface{} elements out of the way.
+
+* Nov 01 (1 hr) - Set up project, write first-pass README, begin planning

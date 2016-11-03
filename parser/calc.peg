@@ -1,0 +1,54 @@
+{
+    package main
+
+    func main() {
+        r, err := Parse("whatever", []byte("3+5 * 4"))
+        fmt.Println(err)
+        fmt.Printf("%#v\n", r)
+    }
+}
+
+Input <- _ result:MathExpr _ EOF { return result, nil }
+
+MathExpr <- first:Term   functor:( _ PLUS _ x:Term { return func(i int) int { return i+x.(int)}, nil }
+                   / _ MINUS _ x:Term { return func(i int) int { return i*x.(int)}, nil }
+                   )* {
+                        fmt.Printf("%#v %#v\n", first, functor)
+                        if functor.([]interface{}) == nil {
+                            return first, nil
+                        } else {
+                            fmt.Println("It's not nil")
+                        }
+                        f := functor.([]interface{})[0].(func(int)int)
+                        return f(first.(int)), nil
+                    }
+
+Term <- first:Factor   functor:( _ TIMES _ x:Factor { return func(i int) int { return i*x.(int)}, nil }
+                 / _ DIVIDE _ x:Factor { return func(i int) int { return i/x.(int)}, nil }
+                 )* {
+                        fmt.Printf("%#v %#v\n", first, functor)
+                        if functor.([]interface{}) == nil {
+                            return first, nil
+                        } else {
+                            fmt.Println("It's not nil")
+                        }
+                        f := functor.([]interface{})[0].(func(int)int)
+                        return f(first.(int)), nil
+                    }
+
+Factor <- ( value:Value  { return value, nil }
+          / MINUS value:Value { return -(value.(int)), nil }
+          )
+
+Value <- value:[0-9]+ {
+    return strconv.Atoi(string(c.text))
+}
+
+PLUS <- '+'
+MINUS <- '-'
+TIMES <- '*'
+DIVIDE <- '/'
+
+_ "whitespace" <- [ \n\t\r]*
+
+EOF = !.
