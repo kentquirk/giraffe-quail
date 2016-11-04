@@ -1,0 +1,91 @@
+{
+    package main
+
+    func main() {
+        r, err := Parse("whatever", []byte("Howdy"))
+        fmt.Println(err)
+        fmt.Printf("%#v\n", r)
+    }
+}
+
+Stream <- (_* Token)* EOF
+
+// Values
+IntValue <- IntegerPart
+IntegerPart <-
+    ( NegativeSign? 0
+    / NegativeSign? NonZeroDigit Digit*
+    )
+
+FloatValue <-
+    ( IntegerPart FractionalPart
+    / IntegerPart ExponentPart
+    / IntegerPart FractionalPart ExponentPart
+    )
+FractionalPart <- '.' Digit+
+ExponentPart <- ExponentIndicator Sign? Digit+
+
+StringValue <-
+    ( Quote Quote
+    / Quote StringCharacter+ Quote
+    )
+
+StringCharacter <-
+    // 'SourceCharacter but not " or \ or LineTerminator'
+    ( [\u0009\u0020\u0021\u0023-\u005B\u005D-\uFFFF]
+    / '\\' 'u' EscapedUnicode
+    / '\\' EscapedCharacter
+    )
+
+// Lexical Tokens:
+Token <-
+    ( Punctuator
+    / Name
+    / IntValue
+    / FloatValue
+    / StringValue
+    )
+
+// Ignored Tokens
+_ "Ignored" <-
+   ( UnicodeBOM
+   / WhiteSpace
+   / LineTerminator
+   / Comment
+   / Comma
+   )
+
+// Here are the character classes
+
+SourceCharacter <-
+    [\u0009\n\u000D\u0020-\uFFFF]
+
+UnicodeBOM "ByteOrderMark" <-
+    '\uFEFF'
+
+LineTerminator "EOL" <-
+    ( '\n'
+    / '\r' !'\n'
+    / '\r' '\n'
+    )
+
+WhiteSpace <- [ \t]*
+Comment <- '#' .* !LineTerminator
+Comma <- ','
+NegativeSign <- '-'
+Digit <- [0-9]
+NonZeroDigit <- [1-9]
+ExponentIndicator <- [eE]
+Sign <- [+-]
+Quote <- '"'
+EscapedUnicode <- [0-9A-Fa-f]//{4}
+EscapedCharacter <- ["\/bfnrt]
+
+Punctuator <-
+    ( [!$():=@[\]{|}]
+    / "..."
+    )
+
+Name <- [_A-Za-z][_0-9A-Za-z]*
+
+EOF = !.

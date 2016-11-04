@@ -23,26 +23,29 @@ MathExpr <- first:Term   functor:( _ PLUS _ x:Term { return func(i int) int { re
                         return f(first.(int)), nil
                     }
 
-Term <- first:Factor   functor:( _ TIMES _ x:Factor { return func(i int) int { return i*x.(int)}, nil }
-                 / _ DIVIDE _ x:Factor { return func(i int) int { return i/x.(int)}, nil }
-                 )* {
-                        fmt.Printf("%#v %#v\n", first, functor)
-                        if functor.([]interface{}) == nil {
-                            return first, nil
-                        } else {
-                            fmt.Println("It's not nil")
-                        }
-                        f := functor.([]interface{})[0].(func(int)int)
-                        return f(first.(int)), nil
-                    }
+Term <-
+    (first:Factor functor:
+        ( _ TIMES _ x:Factor { return func(i int) int { return i*x.(int)}, nil }
+        / _ DIVIDE _ x:Factor { return func(i int) int { return i/x.(int)}, nil }
+        )*  {
+                fmt.Printf("%#v %#v\n", first, functor)
+                if functor.([]interface{}) == nil {
+                    return first, nil
+                } else {
+                    fmt.Println("It's not nil")
+                }
+                f := functor.([]interface{})[0].(func(int)int)
+                return f(first.(int)), nil
+            }
+    )
 
-Factor <- ( value:Value  { return value, nil }
-          / MINUS value:Value { return -(value.(int)), nil }
-          )
+Factor <-
+    ( value:Value  { return value, nil }
+    / MINUS value:Value { return -(value.(int)), nil }
+    )
 
-Value <- value:[0-9]+ {
-    return strconv.Atoi(string(c.text))
-}
+Value <-
+    value:[0-9]+ { return strconv.Atoi(string(c.text)) }
 
 PLUS <- '+'
 MINUS <- '-'

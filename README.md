@@ -23,13 +23,20 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The plan so far:
 
-- [x] create the project and the repository
+- [ ] Tooling
+    - [x] create the project and the repository
+    - [x] create a sublime text syntax file for peggo
 - [ ] write a parser
     - [x] choose a parser (Pigeon/PEG)
     - [ ] define all the tokens
     - [ ] write the parser (transforming to what - an AST?)
 
 ## The worklog
+
+* Nov 03 - (2 hr)
+    * Adapted the PEGjs Sublime Text settings file to PEGgo. Now I have a usable editor.
+    * Settled on a format for peggo files that I think is pretty acceptable.
+    * Started writing the grammar from the spec. Got a good way into it, tried to build it, and I'm running into what I think is an unclosed bracket or something. Haven't found it yet, too tired to continue.
 
 * Nov 02 (2.5 hr) - Looked into PEG. I wrote a a calculator (not by copying anyone else's - wanted to try it myself). It's nice because it doesn't need a lexer (unlike yacc). It's also easier to write the grammar. I'm going to run with it, but I'm not sure yet about a couple of things:
     * How best to handle syntax errors (writing them into the grammar is the best way to give good error handling, but it really bloats the grammar).
