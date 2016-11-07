@@ -36,9 +36,10 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The worklog
 
-* Nov 06 - (2 hrs) - had to take a couple of days off
+* Nov 06 - (3.5 hrs) - had to take a couple of days off
     * My problem was a 0 that should have been a '0'. Obtuse error message meant that to find it I had to binary search the file. That sucked. I resolve to do better with my parser.
     * With that solved, I managed to get the entire grammar into PEGgo, and it parses and builds a program that compiles.
+    * Built a simple test driver and a simple test file and it failed. Realized that I hadn't dealt with a whole basket of ignorables and added the _ marker to the productions.
 
 * Nov 03 - (2 hr)
     * Adapted the PEGjs Sublime Text settings file to PEGgo. Now I have a usable editor.
