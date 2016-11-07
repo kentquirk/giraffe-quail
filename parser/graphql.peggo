@@ -8,7 +8,51 @@
     }
 }
 
-Stream <- (_* Token)* EOF
+// Documents
+Document <-
+    ( Definition+ EOF
+    )
+
+Definition <-
+    ( OperationDefinition
+    / FragmentDefinition
+    )
+
+OperationDefinition <-
+    ( OperationType Name? VariableDefinitions? Directives? SelectionSet
+    / SelectionSet
+    )
+
+OperationType <-
+    ( "query"
+    / "mutation"
+    )
+
+SelectionSet <- '{' Selection+ '}'
+
+Selection <-
+    ( Field
+    / FragmentSpread
+    / InlineFragment
+    )
+
+Field <- Alias? Name Arguments? Directives? SelectionSet?
+
+Arguments <- '(' Argument+ ')'
+
+Argument <- Name ':' Value
+
+Alias <- Name ':'
+
+FragmentSpread <- "..." FragmentName Directives?
+
+FragmentDefinition <- "fragment" FragmentName TypeCondition Directives? SelectionSet
+
+FragmentName <- Name    // but not 'on'
+
+TypeCondition <- "on" NamedType
+
+InlineFragment <- "..." TypeCondition? Directives? SelectionSet
 
 // Values
 IntValue <- IntegerPart
@@ -25,6 +69,11 @@ FloatValue <-
 FractionalPart <- '.' Digit+
 ExponentPart <- ExponentIndicator Sign? Digit+
 
+BooleanValue <-
+    ( "true"
+    / "false"
+    )
+
 StringValue <-
     ( Quote Quote
     / Quote StringCharacter+ Quote
@@ -36,6 +85,51 @@ StringCharacter <-
     / '\\' 'u' EscapedUnicode
     / '\\' EscapedCharacter
     )
+
+NullValue <- "null"
+
+EnumValue <- Name   // but not true, false, or null
+
+ListValue <-
+    ( '[' ']'
+    / '[' Value+ ']'
+    )
+
+ObjectValue <-
+    ( '{' '}'
+    / '{' ObjectField+ '}'
+    )
+
+ObjectField <- Name ':' Value
+
+// Variables
+Variable <- '$' Name
+
+VariableDefinitions <- '(' VariableDefinition+ ')'
+
+VariableDefinition <- Variable ':' Type DefaultValue?
+
+DefaultValue <- '=' Value
+
+// Types
+Type <-
+    ( NamedType
+    / ListType
+    / NonNullType
+    )
+
+NamedType <- Name
+ListType <- '[' Type ']'
+NonNullType <-
+    ( NamedType '!'
+    / ListType '!'
+    )
+
+// Directives
+Directives <- Directive+
+
+Directive <- '@' Name Arguments?
+
 
 // Lexical Tokens:
 Token <-
@@ -79,7 +173,7 @@ ExponentIndicator <- [eE]
 Sign <- [+-]
 Quote <- '"'
 EscapedUnicode <- [0-9A-Fa-f]//{4}
-EscapedCharacter <- ["\/bfnrt]
+EscapedCharacter <- ["\\/bfnrt]
 
 Punctuator <-
     ( [!$():=@[\]{|}]

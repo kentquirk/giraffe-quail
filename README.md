@@ -28,13 +28,17 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     - [x] create a sublime text syntax file for peggo
 - [ ] write a parser
     - [x] choose a parser (Pigeon/PEG)
-    - [ ] define all the tokens
-    - [ ] write the parser (transforming to what - an AST?)
+    - [x] define all the tokens
+    - [ ] test the parser (build a recognizer testbed)
+    - [ ] write or acquire a bunch of parser tests - probably can steal test cases from the graphql implementation in Node.
+    - [ ] fix the problems the grammar tests find
+    - [ ] use the parser (transforming to what - an AST?)
 
 ## The worklog
 
-* Nov 06 - () - had to take a couple of days off
+* Nov 06 - (2 hrs) - had to take a couple of days off
     * My problem was a 0 that should have been a '0'. Obtuse error message meant that to find it I had to binary search the file. That sucked. I resolve to do better with my parser.
+    * With that solved, I managed to get the entire grammar into PEGgo, and it parses and builds a program that compiles.
 
 * Nov 03 - (2 hr)
     * Adapted the PEGjs Sublime Text settings file to PEGgo. Now I have a usable editor.
