@@ -1,16 +1,10 @@
 {
     package main
-
-    func main() {
-        r, err := Parse("whatever", []byte("Howdy"))
-        fmt.Println(err)
-        fmt.Printf("%#v\n", r)
-    }
 }
 
 // Documents
 Document <-
-    ( Definition+ EOF
+    ( Definition+ _ EOF
     )
 
 Definition <-
@@ -24,11 +18,11 @@ OperationDefinition <-
     )
 
 OperationType <-
-    ( "query"
-    / "mutation"
+    ( _ "query"
+    / _ "mutation"
     )
 
-SelectionSet <- '{' Selection+ '}'
+SelectionSet <- _ '{' Selection+ _ '}'
 
 Selection <-
     ( Field
@@ -36,25 +30,37 @@ Selection <-
     / InlineFragment
     )
 
-Field <- Alias? Name Arguments? Directives? SelectionSet?
+Field <- Alias? _ Name Arguments? Directives? SelectionSet?
 
-Arguments <- '(' Argument+ ')'
+Arguments <- _ '(' Argument+ _ ')'
 
-Argument <- Name ':' Value
+Argument <- _ Name _ ':' _ Value
 
-Alias <- Name ':'
+Alias <- _ Name _ ':'
 
-FragmentSpread <- "..." FragmentName Directives?
+FragmentSpread <- _ "..." FragmentName Directives?
 
-FragmentDefinition <- "fragment" FragmentName TypeCondition Directives? SelectionSet
+FragmentDefinition <- _ "fragment" FragmentName TypeCondition Directives? SelectionSet
 
 FragmentName <- Name    // but not 'on'
 
-TypeCondition <- "on" NamedType
+TypeCondition <- _ "on" NamedType
 
-InlineFragment <- "..." TypeCondition? Directives? SelectionSet
+InlineFragment <- _ "..." TypeCondition? Directives? SelectionSet
 
 // Values
+Value <-
+    ( Variable
+    / IntValue
+    / FloatValue
+    / StringValue
+    / BooleanValue
+    / NullValue
+    / EnumValue
+    / ListValue
+    / ObjectValue
+    )
+
 IntValue <- IntegerPart
 IntegerPart <-
     ( NegativeSign? '0'
@@ -70,13 +76,13 @@ FractionalPart <- '.' Digit+
 ExponentPart <- ExponentIndicator Sign? Digit+
 
 BooleanValue <-
-    ( "true"
-    / "false"
+    ( _ "true"
+    / _ "false"
     )
 
 StringValue <-
-    ( Quote Quote
-    / Quote StringCharacter+ Quote
+    ( _ '"' '"'
+    / _ '"' StringCharacter+ '"'
     )
 
 StringCharacter <-
@@ -86,30 +92,30 @@ StringCharacter <-
     / '\\' EscapedCharacter
     )
 
-NullValue <- "null"
+NullValue <- _ "null"
 
 EnumValue <- Name   // but not true, false, or null
 
 ListValue <-
-    ( '[' ']'
-    / '[' Value+ ']'
+    ( _ '[' _ ']'
+    / _ '[' Value+ _ ']'
     )
 
 ObjectValue <-
-    ( '{' '}'
-    / '{' ObjectField+ '}'
+    ( _ '{' _ '}'
+    / _ '{' ObjectField+ _ '}'
     )
 
-ObjectField <- Name ':' Value
+ObjectField <- _ Name _ ':' _ Value
 
 // Variables
-Variable <- '$' Name
+Variable <- _ '$' Name
 
-VariableDefinitions <- '(' VariableDefinition+ ')'
+VariableDefinitions <- _ '(' _ VariableDefinition+ _ ')'
 
-VariableDefinition <- Variable ':' Type DefaultValue?
+VariableDefinition <- _ Variable _ ':' _ Type DefaultValue?
 
-DefaultValue <- '=' Value
+DefaultValue <- _ '=' _ Value
 
 // Types
 Type <-
@@ -119,7 +125,7 @@ Type <-
     )
 
 NamedType <- Name
-ListType <- '[' Type ']'
+ListType <- _ '[' _ Type _ ']'
 NonNullType <-
     ( NamedType '!'
     / ListType '!'
@@ -128,7 +134,7 @@ NonNullType <-
 // Directives
 Directives <- Directive+
 
-Directive <- '@' Name Arguments?
+Directive <- _ '@' Name _ Arguments?
 
 
 // Lexical Tokens:
@@ -141,7 +147,8 @@ Token <-
     )
 
 // Ignored Tokens
-_ "Ignored" <-
+_ <- I*
+I "Ignored" <-
    ( UnicodeBOM
    / WhiteSpace
    / LineTerminator
@@ -163,7 +170,7 @@ LineTerminator "EOL" <-
     / '\r' '\n'
     )
 
-WhiteSpace <- [ \t]*
+WhiteSpace <- [ \t]
 Comment <- '#' .* !LineTerminator
 Comma <- ','
 NegativeSign <- '-'
@@ -171,7 +178,6 @@ Digit <- [0-9]
 NonZeroDigit <- [1-9]
 ExponentIndicator <- [eE]
 Sign <- [+-]
-Quote <- '"'
 EscapedUnicode <- [0-9A-Fa-f]//{4}
 EscapedCharacter <- ["\\/bfnrt]
 
