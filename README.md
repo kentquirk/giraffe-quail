@@ -33,6 +33,9 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The worklog
 
+* Nov 06 - () - had to take a couple of days off
+    * My problem was a 0 that should have been a '0'. Obtuse error message meant that to find it I had to binary search the file. That sucked. I resolve to do better with my parser.
+
 * Nov 03 - (2 hr)
     * Adapted the PEGjs Sublime Text settings file to PEGgo. Now I have a usable editor.
     * Settled on a format for peggo files that I think is pretty acceptable.

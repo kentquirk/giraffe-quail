@@ -13,7 +13,7 @@ Stream <- (_* Token)* EOF
 // Values
 IntValue <- IntegerPart
 IntegerPart <-
-    ( NegativeSign? 0
+    ( NegativeSign? '0'
     / NegativeSign? NonZeroDigit Digit*
     )
 
