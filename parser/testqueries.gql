@@ -1,0 +1,117 @@
+query HeroNameQuery {
+  hero {
+    name
+  }
+}
+
+query HeroNameAndFriendsQuery {
+  hero {
+    id
+    name
+    friends {
+      name
+    }
+  }
+}
+
+query NestedQuery {
+  hero {
+    name
+    friends {
+      name
+      appearsIn
+      friends {
+        name
+      }
+    }
+  }
+}
+
+query FetchLukeQuery {
+  human(id: "1000") {
+    name
+  }
+}
+
+query FetchSomeIDQuery($someId: String!) {
+  human(id: $someId) {
+    name
+  }
+}
+
+query FetchLukeAliased {
+  luke: human(id: "1000") {
+    name
+  }
+}
+
+query FetchLukeAndLeiaAliased {
+  luke: human(id: "1000") {
+    name
+  }
+  leia: human(id: "1003") {
+    name
+  }
+}
+
+query DuplicateFields {
+  luke: human(id: "1000") {
+    name
+    homePlanet
+  }
+  leia: human(id: "1003") {
+    name
+    homePlanet
+  }
+}
+
+query UseFragment {
+  luke: human(id: "1000") {
+    ...HumanFragment
+  }
+  leia: human(id: "1003") {
+    ...HumanFragment
+  }
+}
+fragment HumanFragment on Human {
+  name
+  homePlanet
+}
+
+query CheckTypeOfR2 {
+  hero {
+    __typename
+    name
+  }
+}
+
+query CheckTypeOfLuke {
+  hero(episode: EMPIRE) {
+    __typename
+    name
+  }
+}
+
+query HeroNameQuery {
+  hero {
+    name
+    secretBackstory
+  }
+}
+
+query HeroNameQuery {
+  hero {
+    name
+    friends {
+      name
+      secretBackstory
+    }
+  }
+}
+
+query HeroNameQuery {
+  mainHero: hero {
+    name
+    story: secretBackstory
+  }
+}

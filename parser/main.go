@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,16 +13,21 @@ func main() {
 	flag.Parse()
 
 	for _, a := range flag.Args() {
-		bytes, err := ioutil.ReadFile(a)
+		b, err := ioutil.ReadFile(a)
 		if err != nil {
 			fmt.Println("couldn't read ", a)
 			continue
 		}
-		fmt.Println("parsing ", a)
-		r, err := Parse(a, bytes)
-		if err != nil {
-			fmt.Println(err)
+
+		queries := bytes.Split(b, []byte("\n\n"))
+		for _, q := range queries {
+			fmt.Println("parsing ", a)
+			fmt.Printf("%s\n", q)
+			r, err := Parse(a, q)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Printf("%#v\n", r)
 		}
-		fmt.Printf("%#v\n", r)
 	}
 }

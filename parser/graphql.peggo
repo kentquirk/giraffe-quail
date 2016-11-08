@@ -13,7 +13,7 @@ Definition <-
     )
 
 OperationDefinition <-
-    ( OperationType Name? VariableDefinitions? Directives? SelectionSet
+    ( OperationType _ Name? VariableDefinitions? Directives? SelectionSet
     / SelectionSet
     )
 
@@ -42,9 +42,9 @@ FragmentSpread <- _ "..." FragmentName Directives?
 
 FragmentDefinition <- _ "fragment" FragmentName TypeCondition Directives? SelectionSet
 
-FragmentName <- Name    // but not 'on'
+FragmentName <- _ Name    // but not 'on'
 
-TypeCondition <- _ "on" NamedType
+TypeCondition <- _ "on" _ NamedType
 
 InlineFragment <- _ "..." TypeCondition? Directives? SelectionSet
 
