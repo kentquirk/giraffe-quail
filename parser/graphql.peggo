@@ -119,13 +119,15 @@ DefaultValue <- _ '=' _ Value
 
 // Types
 Type <-
-    ( NamedType
+    ( NonNullType
     / ListType
-    / NonNullType
+    / NamedType
     )
 
 NamedType <- Name
+
 ListType <- _ '[' _ Type _ ']'
+
 NonNullType <-
     ( NamedType '!'
     / ListType '!'
