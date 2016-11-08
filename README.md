@@ -38,6 +38,7 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 * Nov 07 - ()
     * Search for test files; grab some test queries from the tests for graphql-js. Find some more missing ignorable locations and fix them.
+    * Hunt down a problem with ListValues
 
 * Nov 06 - (3.5 hrs) - had to take a couple of days off
     * My problem was a 0 that should have been a '0'. Obtuse error message meant that to find it I had to binary search the file. That sucked. I resolve to do better with my parser.

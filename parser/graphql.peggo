@@ -98,7 +98,7 @@ EnumValue <- Name   // but not true, false, or null
 
 ListValue <-
     ( _ '[' _ ']'
-    / _ '[' Value+ _ ']'
+    / _ '[' (_ Value)+ ']'
     )
 
 ObjectValue <-
