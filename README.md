@@ -34,18 +34,21 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     - [ ] create a parser test suite
     - [x] fix the problems the grammar tests find
     - [ ] start adding error productions and build an error reporting mechanism
-- [ ] AST
-    - [ ] design an AST structure
-    - [ ] build an AST structure
-    - [ ] use the parser (transforming to the AST)
+- [ ] Data structures
+    - [ ] design a parser data structure
+    - [ ] get the parser to produce it
+
 
 ## The worklog
 
-* Nov 11 - (2)
+* Nov 11 - (4) - no work for Veteran's Day so I get to do this
     * Move main out of the parser directory, rename the package.
     * Learn more about how to structure things so that the .peggo file is as minimal as possible.
     * Add some basic productions for simple types.
     * Add parserHelpers.go to help keep code out of the .peggo file.
+    * Decide that an AST is probably overkill for this problem -- it's not a full language, and there is no need to generate source code or to transform the result
+    into some other form (optimization)
+    * Start working on the structure of Value objects; implement the simple types. Looks like variables are going to require a little bit of rework.
 
 * Nov 08-09-10 - recover
 

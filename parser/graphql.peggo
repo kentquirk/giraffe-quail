@@ -77,7 +77,7 @@ Value <-
     / ObjectValue
     )
 
-IntValue <- IntegerPart
+IntValue <- IntegerPart { return ParseInt(string(c.text)) }
 IntegerPart <-
     ( NegativeSign? '0'
     / NegativeSign? NonZeroDigit Digit*
@@ -87,20 +87,20 @@ FloatValue <-
     ( IntegerPart FractionalPart
     / IntegerPart ExponentPart
     / IntegerPart FractionalPart ExponentPart
-    )
+    ) { return ParseFloat(string(c.text)) }
 FractionalPart <- '.' Digit+
 ExponentPart <- ExponentIndicator Sign? Digit+
 
 BooleanValue <-
-    ( _ "true" { return true, nil }
-    / _ "false" { return false, nil }
+    ( _ "true" { return MakeBool(true), nil }
+    / _ "false" { return MakeBool(false), nil }
     )
 
 StringValue <-
-    ( _ '"' '"' { return "", nil }
-    / _ '"' s:StringChars '"' { return s.(string), nil }
+    ( _ '"' '"' { return MakeStr(""), nil }
+    / _ '"' s:StringChars '"' { return MakeStr(s.(string)), nil }
     / _ '"' s:StringChars !'"' {
-        return s.(string), c.NewError("Missing close quote for string.", "SV-1")
+        return MakeStr(s.(string)), c.NewError("Missing close quote for string.", "SV-1")
         }
     )
 
@@ -113,35 +113,48 @@ StringCharacter <-
     / '\\' EscapedCharacter
     ) { return c.text, nil }
 
-NullValue <- _ "null" { return nil, nil }
+NullValue <- _ "null" { return MakeNull(), nil }
 
 EnumValue <- Name   // but not true, false, or null
-    { return string(c.text), nil }
+    { return MakeEnum(string(c.text)), nil }
 
 ListValue <-
-    ( _ '[' _ ']'
-    / _ '[' (_ Value)+ ']'
+    ( _ '[' _ ']' { return MakeList(), nil }
+    / _ '[' va:(_ Value)+ ']' {
+            list := MakeList();
+            for _, v := range va.([]interface{}) {
+                list.Append(v.(Value))
+            }
+            return list, nil
+        }
     / _ '[' (_ Value)+ !']' {
-            return "invalid list", c.NewError("Missing close square bracket for list.", "LV-1")
+            return MakeList(), c.NewError("Missing close square bracket for list.", "LV-1")
         }
     )
 
 ObjectValue <-
-    ( _ '{' _ '}'
-    / _ '{' ObjectField+ _ '}'
-    / _ '{' ObjectField+ _ !'}' {
+    ( _ '{' _ '}' { return MakeObj(), nil }
+    / _ '{' oa:ObjectField+ _ '}' {
+            obj := MakeObj()
+            for _, v := range oa.([]interface{}) {
+                obj.SetField(v.(Value))
+            }
+            return obj, nil
+        }
+    / _ '{' oa:ObjectField+ _ !'}' {
             return "invalid object", c.NewError("Missing close curly brace for object.", "OV-1")
         }
     )
 
-ObjectField <- _ Name _ ':' _ Value
+ObjectField <- _ n:Name _ ':' _ v:Value { return MakeField(n.(string), v.(Value)), nil }
+
 
 // Variables
-Variable <- _ '$' Name
+Variable <- _ '$' Name { return MakeVar(string(c.text)), nil }
 
 VariableDefinitions <- _ '(' _ VariableDefinition+ _ ')'
 
-VariableDefinition <- _ Variable _ ':' _ Type DefaultValue?
+VariableDefinition <- _ vi:Variable _ ':' _ t:Type dv:DefaultValue?
 
 DefaultValue <- _ '=' _ Value
 
