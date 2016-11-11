@@ -42,15 +42,17 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 ## The worklog
 
 * Nov 11 - (2)
-    * Move main out of the parser directory, rename the package
-    * Work on error handling and structuring things so that the .peggo file is as minimal as possible.
+    * Move main out of the parser directory, rename the package.
+    * Learn more about how to structure things so that the .peggo file is as minimal as possible.
+    * Add some basic productions for simple types.
+    * Add parserHelpers.go to help keep code out of the .peggo file.
 
 * Nov 08-09-10 - recover
 
 * Nov 07 - (2 hrs)
     * Search for test files; grab some test queries from the tests for graphql-js. Find some more missing ignorable locations and fix them.
-    * Hunt down a problem with ListValues
-    * Learn how to resolve shift-reduce conflicts in Peg
+    * Hunt down a problem with ListValues.
+    * Learn how to resolve shift-reduce conflicts in Peg.
 
 * Nov 06 - (3.5 hrs) - had to take a couple of days off
     * My problem was a 0 that should have been a '0'. Obtuse error message meant that to find it I had to binary search the file. That sucked. I resolve to do better with my parser.
