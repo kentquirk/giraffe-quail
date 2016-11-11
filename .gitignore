@@ -22,3 +22,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+giraffe-quail
+parser/graphql.go
+
