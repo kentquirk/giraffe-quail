@@ -1,5 +1,20 @@
+// This is a parser file for parsing graphql.
+// It is designed to be consumed by pigeon.
+// (see https://godoc.org/github.com/PuerkitoBio/pigeon)
+//
+// A couple of notes if you're thinking of contributing:
+// The intent is to keep this file as minimal as possible and
+// to put as much supporting code into .go files as can be reasonably
+// managed.
+//
+// Format-wise, we're using a style that works pretty well for YACC grammars.
+// Namely, we enclose choice expressions in () and then align these, plus the different
+// options for a choice expression (which are separated by /) all to the same column.
+// The code blocks are indented further than these elements.
+// One-line definitions can be placed on one line.
+
 {
-    package main
+    package parser
 }
 
 // Documents
@@ -8,8 +23,8 @@ Document <-
     )
 
 Definition <-
-    ( OperationDefinition
-    / FragmentDefinition
+    ( FragmentDefinition
+    / OperationDefinition
     )
 
 OperationDefinition <-
@@ -20,6 +35,7 @@ OperationDefinition <-
 OperationType <-
     ( _ "query"
     / _ "mutation"
+    / _ n:Name { return n, c.NewError("Must be query or mutation.", "OT-1") }
     )
 
 SelectionSet <- _ '{' Selection+ _ '}'
@@ -76,34 +92,46 @@ FractionalPart <- '.' Digit+
 ExponentPart <- ExponentIndicator Sign? Digit+
 
 BooleanValue <-
-    ( _ "true"
-    / _ "false"
+    ( _ "true" { return true, nil }
+    / _ "false" { return false, nil }
     )
 
 StringValue <-
-    ( _ '"' '"'
-    / _ '"' StringCharacter+ '"'
+    ( _ '"' '"' { return "", nil }
+    / _ '"' s:StringChars '"' { return s.(string), nil }
+    / _ '"' s:StringChars !'"' {
+        return s.(string), c.NewError("Missing close quote for string.", "SV-1")
+        }
     )
+
+StringChars <- StringCharacter+ { return string(c.text), nil }
 
 StringCharacter <-
     // 'SourceCharacter but not " or \ or LineTerminator'
     ( [\u0009\u0020\u0021\u0023-\u005B\u005D-\uFFFF]
     / '\\' 'u' EscapedUnicode
     / '\\' EscapedCharacter
-    )
+    ) { return c.text, nil }
 
-NullValue <- _ "null"
+NullValue <- _ "null" { return nil, nil }
 
 EnumValue <- Name   // but not true, false, or null
+    { return string(c.text), nil }
 
 ListValue <-
     ( _ '[' _ ']'
     / _ '[' (_ Value)+ ']'
+    / _ '[' (_ Value)+ !']' {
+            return "invalid list", c.NewError("Missing close square bracket for list.", "LV-1")
+        }
     )
 
 ObjectValue <-
     ( _ '{' _ '}'
     / _ '{' ObjectField+ _ '}'
+    / _ '{' ObjectField+ _ !'}' {
+            return "invalid object", c.NewError("Missing close curly brace for object.", "OV-1")
+        }
     )
 
 ObjectField <- _ Name _ ':' _ Value

@@ -115,3 +115,12 @@ query HeroNameQuery {
     story: secretBackstory
   }
 }
+
+foo test {
+}
+
+query TestQuery {
+  Luke: human(id:"123) {
+    name
+  }
+}

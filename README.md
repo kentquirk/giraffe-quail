@@ -23,20 +23,31 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The plan so far:
 
-- [ ] Tooling
+- [x] Tooling
     - [x] create the project and the repository
     - [x] create a sublime text syntax file for peggo
-- [ ] write a parser
+- [x] write a parser
     - [x] choose a parser (Pigeon/PEG)
     - [x] define all the tokens
-    - [ ] test the parser (build a recognizer testbed)
-    - [ ] write or acquire a bunch of parser tests - probably can steal test cases from the graphql implementation in Node.
-    - [ ] fix the problems the grammar tests find
-    - [ ] use the parser (transforming to what - an AST?)
+    - [x] smoketest the parser (build a recognizer testbed)
+    - [x] write or acquire a bunch of parser tests - probably can steal test cases from the graphql implementation in Node. (I have nowhere near enough tests, but at the moment there are enough to move on to other things.)
+    - [ ] create a parser test suite
+    - [x] fix the problems the grammar tests find
+    - [ ] start adding error productions and build an error reporting mechanism
+- [ ] AST
+    - [ ] design an AST structure
+    - [ ] build an AST structure
+    - [ ] use the parser (transforming to the AST)
 
 ## The worklog
 
-* Nov 07 - ()
+* Nov 11 - (2)
+    * Move main out of the parser directory, rename the package
+    * Work on error handling and structuring things so that the .peggo file is as minimal as possible.
+
+* Nov 08-09-10 - recover
+
+* Nov 07 - (2 hrs)
     * Search for test files; grab some test queries from the tests for graphql-js. Find some more missing ignorable locations and fix them.
     * Hunt down a problem with ListValues
     * Learn how to resolve shift-reduce conflicts in Peg

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/kentquirk/giraffe-quail/parser"
 )
 
 func main() {
@@ -21,14 +23,16 @@ func main() {
 		}
 
 		queries := bytes.Split(b, []byte("\n\n"))
+		hadErrors := 0
 		for _, q := range queries {
 			fmt.Println("parsing ", a)
 			fmt.Printf("%s\n", q)
-			_, err := Parse(a, q)
+			_, err := parser.Parse(a, q)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				parser.DumpErrors(err)
+				hadErrors = 1
 			}
 		}
+		os.Exit(hadErrors)
 	}
 }
