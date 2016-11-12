@@ -137,7 +137,7 @@ ObjectValue <-
     / _ '{' oa:ObjectField+ _ '}' {
             obj := MakeObj()
             for _, v := range oa.([]interface{}) {
-                obj.SetField(v.(Value))
+                obj.Set(v.(Value))
             }
             return obj, nil
         }
@@ -165,7 +165,7 @@ Type <-
     / NamedType
     )
 
-NamedType <- Name
+NamedType <- n:Name
 
 ListType <- _ '[' _ Type _ ']'
 

@@ -41,7 +41,10 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The worklog
 
-* Nov 11 - (4) - no work for Veteran's Day so I get to do this
+* Nov 12 - (2 hrs)
+    * Figuring out how best to handle variables and types. Made good progress on it but realized that types shouldn't be an enum, they should be a service where types get registered, with some types built in.
+
+* Nov 11 - (4 hrs) - no work for Veteran's Day so I get to do this.
     * Move main out of the parser directory, rename the package.
     * Learn more about how to structure things so that the .peggo file is as minimal as possible.
     * Add some basic productions for simple types.
