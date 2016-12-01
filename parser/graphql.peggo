@@ -15,6 +15,11 @@
 
 {
     package parser
+
+    var typereg TypeRegistry
+    func init() {
+        typereg = CreateTypeRegistry()
+    }
 }
 
 // Documents
@@ -67,17 +72,17 @@ InlineFragment <- _ "..." TypeCondition? Directives? SelectionSet
 // Values
 Value <-
     ( Variable
-    / IntValue
     / FloatValue
+    / IntValue
     / StringValue
     / BooleanValue
     / NullValue
-    / EnumValue
+    / EnumValue    // but not true, false, or null, so must be after bool and null
     / ListValue
     / ObjectValue
     )
 
-IntValue <- IntegerPart { return ParseInt(string(c.text)) }
+IntValue <- IntegerPart { return typereg.ParseInt(string(c.text)) }
 IntegerPart <-
     ( NegativeSign? '0'
     / NegativeSign? NonZeroDigit Digit*
@@ -87,20 +92,20 @@ FloatValue <-
     ( IntegerPart FractionalPart
     / IntegerPart ExponentPart
     / IntegerPart FractionalPart ExponentPart
-    ) { return ParseFloat(string(c.text)) }
+    ) { return typereg.ParseFloat(string(c.text)) }
 FractionalPart <- '.' Digit+
 ExponentPart <- ExponentIndicator Sign? Digit+
 
 BooleanValue <-
-    ( _ "true" { return MakeBool(true), nil }
-    / _ "false" { return MakeBool(false), nil }
+    ( _ "true" { return typereg.MakeBool(true), nil }
+    / _ "false" { return typereg.MakeBool(false), nil }
     )
 
 StringValue <-
-    ( _ '"' '"' { return MakeStr(""), nil }
-    / _ '"' s:StringChars '"' { return MakeStr(s.(string)), nil }
+    ( _ '"' '"' { return typereg.MakeStr(""), nil }
+    / _ '"' s:StringChars '"' { return typereg.MakeStr(s.(string)), nil }
     / _ '"' s:StringChars !'"' {
-        return MakeStr(s.(string)), c.NewError("Missing close quote for string.", "SV-1")
+        return typereg.MakeStr(s.(string)), c.NewError("Missing close quote for string.", "SV-1")
         }
     )
 
@@ -113,48 +118,60 @@ StringCharacter <-
     / '\\' EscapedCharacter
     ) { return c.text, nil }
 
-NullValue <- _ "null" { return MakeNull(), nil }
+NullValue <- _ "null" { return typereg.MakeNull(), nil }
 
-EnumValue <- Name   // but not true, false, or null
-    { return MakeEnum(string(c.text)), nil }
+EnumValue <- Name
+    { return typereg.FindEnum(string(c.text)) }
 
 ListValue <-
-    ( _ '[' _ ']' { return MakeList(), nil }
+    ( _ '[' _ ']' { return typereg.MakeList(), nil }
     / _ '[' va:(_ Value)+ ']' {
-            list := MakeList();
-            for _, v := range va.([]interface{}) {
+            values := va.([]interface{})
+            list := typereg.MakeListOf(values[0].(Value).T);
+            for _, v := range values {
                 list.Append(v.(Value))
             }
             return list, nil
         }
     / _ '[' (_ Value)+ !']' {
-            return MakeList(), c.NewError("Missing close square bracket for list.", "LV-1")
+            return typereg.MakeList(), c.NewError("Missing close square bracket for list.", "LV-1")
         }
     )
 
 ObjectValue <-
-    ( _ '{' _ '}' { return MakeObj(), nil }
+    ( _ '{' _ '}' { return typereg.MakeNamelessObj(), nil }
     / _ '{' oa:ObjectField+ _ '}' {
-            obj := MakeObj()
-            for _, v := range oa.([]interface{}) {
-                obj.Set(v.(Value))
+            obj := typereg.MakeNamelessObj()
+            fields := oa.([]interface{})
+            for _, v := range fields  {
+                // the ObjectField is a Value where the N field is the name
+                // of the field, and the V field is a nested Value object
+                obj.SetField(v.(Value))
             }
             return obj, nil
         }
     / _ '{' oa:ObjectField+ _ !'}' {
-            return "invalid object", c.NewError("Missing close curly brace for object.", "OV-1")
+            return typereg.MakeNamelessObj(), c.NewError("Missing close curly brace for object.", "OV-1")
         }
     )
 
-ObjectField <- _ n:Name _ ':' _ v:Value { return MakeField(n.(string), v.(Value)), nil }
+ObjectField <- _ n:Name _ ':' _ v:Value { return Value{N:n.(string), V:v}, nil }
 
 
 // Variables
-Variable <- _ '$' Name { return MakeVar(string(c.text)), nil }
+Variable <- _ '$' Name { return Variable{N:string(c.text)}, nil }
 
 VariableDefinitions <- _ '(' _ VariableDefinition+ _ ')'
 
-VariableDefinition <- _ vi:Variable _ ':' _ t:Type dv:DefaultValue?
+VariableDefinition <- _ vi:Variable _ ':' _ ti:Type dvi:DefaultValue?
+    {
+        v := vi.(Variable)
+        t := ti.(Type)
+        dv := dvi.(Value)
+        v.T = t
+        v.V = dv
+        return v, nil
+    }
 
 DefaultValue <- _ '=' _ Value
 
@@ -165,13 +182,13 @@ Type <-
     / NamedType
     )
 
-NamedType <- n:Name
+NamedType <- n:Name { return typereg.Get(n.(string)) }
 
-ListType <- _ '[' _ Type _ ']'
+ListType <- _ '[' _ t:Type _ ']' { return ListType{Contains:t.(Type)}, nil }
 
 NonNullType <-
-    ( NamedType '!'
-    / ListType '!'
+    ( t:NamedType '!' { return NonNullType{Contains:t.(Type)}, nil }
+    / t:ListType '!' { return NonNullType{Contains:t.(Type)}, nil }
     )
 
 // Directives
