@@ -14,12 +14,7 @@
 // One-line definitions can be placed on one line.
 
 {
-    package parser
-
-    var typereg TypeRegistry
-    func init() {
-        typereg = CreateTypeRegistry()
-    }
+    package typeschema
 }
 
 // Documents
@@ -47,25 +42,19 @@ Implements <- _ "implements" _ Name
 
 EnumValueSet <- _ "{" EnumValues _ "}"
 
-EnumValues <-
-    ( _ Name
-    / _ Name _ "," _ EnumValues
-    )
+EnumValues <- (_ Name)+
 
 UnionSet <- _ "=" UnionNames
 
-UnionNames <-
-    ( _ Name
-    / _ Name "|" UnionNames
-    )
+UnionNames <- _ Name (_ "|" _ Name)*
 
 FieldSet <-  _ "{" Field+ _ "}"
 
-Field <- Name Arguments? _ ":" Type
+Field <- _ Name Arguments? _ ":" Type
 
 Arguments <- _ '(' Argument+ _ ')'
 
-Argument <- _ Name _ ':' _ Type
+Argument <- _ Name _ ':' Type
 
 Type <-
     ( NonNullType
@@ -76,16 +65,16 @@ Type <-
 
 // we may want to replace this with just Name but do a lookup to determine type
 ScalarType <-
-    ( "Int"
-    / "Float"
-    / "String"
-    / "Boolean"
-    / "ID"
+    ( _ "Int"
+    / _ "Float"
+    / _ "String"
+    / _ "Boolean"
+    / _ "ID"
     )
 
 NamedType <- _ n:Name
 
-ListType <- '[' _ t:Type _ ']'
+ListType <- _ '[' _ t:Type _ ']'
 
 NonNullType <-
     ( t:ListType

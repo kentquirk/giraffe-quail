@@ -39,14 +39,17 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     - [ ] get the parser to produce it
 - [ ] Schema
     - [x] Create a schema definition language parser
-    - [ ] Test it on some standard schema
+    - [x] Test it on some standard schema
     - [ ] Make it generate type definitions for the graphql parser
 
 
 ## The worklog
 
-* Dec 1 - () - Well, so much for GoCoWriMo -- I was sick and then life got in the way. Now I'm finally getting back to it. The good news is that I've been able to fit this into my job, so I do have some time to work on it now.
+* Dec 2 - () - Starting building some tests for the schema parser; found a few minor bugs in the .peggo file but now have a full set of tests working, and it parses the example grammar used in an explanatory page. Now I have to have it start building type definitions.
+
+* Dec 1 - (5 hrs) - Well, so much for GoCoWriMo -- I was sick and then life got in the way. Now I'm finally getting back to it. The good news is that I've been able to fit this into my job, so I do have some time to work on it now.
     * Today I got a collection of data types and variables and values working, so I'm starting to build some useful data structures here.
+    * Also wrote the first pass of a grammar for parsing the GraphQL type schema language, which is oddly unspecified. I used the examples and followed the same principles as GraphQL itself (example: commas are considered whitespace) and got something that compiles.
 
 * Nov 14 - () - I'm sick
 
