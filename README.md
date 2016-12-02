@@ -35,8 +35,12 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     - [x] fix the problems the grammar tests find
     - [ ] start adding error productions and build an error reporting mechanism
 - [ ] Data structures
-    - [ ] design a parser data structure
+    - [x] design a parser data structure
     - [ ] get the parser to produce it
+- [ ] Schema
+    - [x] Create a schema definition language parser
+    - [ ] Test it on some standard schema
+    - [ ] Make it generate type definitions for the graphql parser
 
 
 ## The worklog
