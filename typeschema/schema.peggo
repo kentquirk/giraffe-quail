@@ -1,0 +1,123 @@
+// This is a parser file for parsing graphql's type definition schema.
+// It is designed to be consumed by pigeon.
+// (see https://godoc.org/github.com/PuerkitoBio/pigeon)
+//
+// A couple of notes if you're thinking of contributing:
+// The intent is to keep this file as minimal as possible and
+// to put as much supporting code into .go files as can be reasonably
+// managed.
+//
+// Format-wise, we're using a style that works pretty well for YACC grammars.
+// Namely, we enclose choice expressions in () and then align these, plus the different
+// options for a choice expression (which are separated by /) all to the same column.
+// The code blocks are indented further than these elements.
+// One-line definitions can be placed on one line.
+
+{
+    package parser
+
+    var typereg TypeRegistry
+    func init() {
+        typereg = CreateTypeRegistry()
+    }
+}
+
+// Documents
+Document <-
+    ( Definition+ _ EOF
+    )
+
+Definition <-
+    ( ObjTypeDefinition
+    / EnumDefinition
+    / InterfaceDefinition
+    / UnionDefinition
+    )
+
+ObjTypeDefinition <- _ "type" _ Name Implements? FieldSet
+
+EnumDefinition <- _ "enum" _ Name EnumValueSet
+
+InterfaceDefinition <- _ "interface" _ Name FieldSet
+
+UnionDefinition <- _ "union" _ Name UnionSet
+
+// Implements can only have the name of an Object Type
+Implements <- _ "implements" _ Name
+
+EnumValueSet <- _ "{" EnumValues _ "}"
+
+EnumValues <-
+    ( _ Name
+    / _ Name _ "," _ EnumValues
+    )
+
+UnionSet <- _ "=" UnionNames
+
+UnionNames <-
+    ( _ Name
+    / _ Name "|" UnionNames
+    )
+
+FieldSet <-  _ "{" Field+ _ "}"
+
+Field <- Name Arguments? _ ":" Type
+
+Arguments <- _ '(' Argument+ _ ')'
+
+Argument <- _ Name _ ':' _ Type
+
+Type <-
+    ( NonNullType
+    / ListType
+    / ScalarType
+    / NamedType
+    )
+
+// we may want to replace this with just Name but do a lookup to determine type
+ScalarType <-
+    ( "Int"
+    / "Float"
+    / "String"
+    / "Boolean"
+    / "ID"
+    )
+
+NamedType <- _ n:Name
+
+ListType <- '[' _ t:Type _ ']'
+
+NonNullType <-
+    ( t:ListType
+    / t:ScalarType '!'
+    / t:NamedType '!'
+    )
+
+
+// Ignored Tokens
+_ <- I*
+I "Ignored" <-
+   ( UnicodeBOM
+   / WhiteSpace
+   / LineTerminator
+   / Comment
+   / Comma
+   )
+
+// Here are the character classes
+
+UnicodeBOM "ByteOrderMark" <-
+    '\uFEFF'
+
+LineTerminator "EOL" <-
+    ( '\n'
+    / '\r' !'\n'
+    / '\r' '\n'
+    )
+
+WhiteSpace <- [ \t]
+Comment <- '#' .* !LineTerminator
+Comma <- ','
+Name <- [_A-Za-z][_0-9A-Za-z]* { return string(c.text), nil }
+
+EOF = !.
