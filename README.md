@@ -41,7 +41,15 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The worklog
 
-* Nov 12 - (2 hrs)
+* Dec 1 - () - Well, so much for GoCoWriMo -- I was sick and then life got in the way. Now I'm finally getting back to it. The good news is that I've been able to fit this into my job, so I do have some time to work on it now.
+    * Today I got a collection of data types and variables and values working, so I'm starting to build some useful data structures here.
+
+* Nov 14 - () - I'm sick
+
+* Nov 13 - (1.5 hr)
+    * Sleeping on it was good. I now have a solid plan and a good part of the implementation for values and types. The key was separating them and having a type registry that knows how to create values.
+
+* Nov 12 - (3 hrs)
     * Figuring out how best to handle variables and types. Made good progress on it but realized that types shouldn't be an enum, they should be a service where types get registered, with some types built in.
 
 * Nov 11 - (4 hrs) - no work for Veteran's Day so I get to do this.

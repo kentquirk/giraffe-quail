@@ -246,6 +246,6 @@ Punctuator <-
     / "..."
     )
 
-Name <- [_A-Za-z][_0-9A-Za-z]*
+Name <- [_A-Za-z][_0-9A-Za-z]* { return string(c.text), nil }
 
 EOF = !.
