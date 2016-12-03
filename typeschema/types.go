@@ -29,10 +29,39 @@ const (
 	T_Null    = "*NULL*"
 )
 
+// Type is the structure that contains information about a GraphQL Type.
+// The Kind of type determines how it stores information. An attempt
+// was made to use Go's type system to do this, by defining an interface
+// that Type would implement, but it started getting pretty big, and the
+// code to use it was getting cumbersome. Instead, we're going to
+// just switch on the Kind value instead and we can reuse a lot of things
+// between the different Kinds.
+// Here's the behavior of different types:
+//
+// Kind         Subtypes/Fields
+// -----------  --------------------------------------------------------
+// Null         nil
+// Scalar       nil
+// Enum         nil, with Values of this type stored in the value registry
+// Obj          nil, Fields contains an ordered list of fields
+// Interface    just like obj
+// List         Subtypes[0] contains the type of the list
+// NonNullable  Subtypes[0] contains the nonnullable type
+// Union        Subtypes contains a list of the types in the union
+// Temp         nil
 type Type struct {
 	Name     string
 	Kind     Kind
 	Subtypes []Type
+	Fields   []Field
+}
+
+// A field is a Name and a Type, used in Obj (and Interface) types,
+// as well as in the Arg list for a field.
+type Field struct {
+	N    string
+	Args []Field
+	T    Type
 }
 
 // Key returns the unique name of this type
@@ -51,7 +80,7 @@ func (t Type) Key() string {
 	}
 }
 
-// TypeNameFor takes a kind and a list of names and returns the unique
+// TypeNameFor takes a kind and a list of names and returns a unique
 // name given that combination
 func TypeNameFor(k Kind, names ...string) string {
 	switch k {
@@ -85,16 +114,23 @@ func NewTypeRegistry() *TypeRegistry {
 // Register adds a type by name to the type registry. It is an error if the type
 // already exists.
 func (tr *TypeRegistry) Register(name string, k Kind, subtypes ...Type) (Type, error) {
+	return tr.RegisterFields(name, k, nil, subtypes...)
+}
+
+// Register adds a type by name to the type registry. It is an error if the type
+// already exists.
+func (tr *TypeRegistry) RegisterFields(name string, k Kind, fields []Field, subtypes ...Type) (Type, error) {
 	if t, found := tr.Types[name]; found {
 		return t, errors.New("Type " + name + " already defined.")
 	}
-	t := Type{Name: name, Kind: k, Subtypes: subtypes}
+	t := Type{Name: name, Kind: k, Subtypes: subtypes, Fields: fields}
 	tr.Types[name] = t
 	return t, nil
 }
 
-// Update modifies a type by name in the type registry. It is an error if the type
-// does not exist.
+// Update modifies a type by looking it up by name in the type registry and then
+// replacing it.
+// It is an error if the type does not exist.
 func (tr *TypeRegistry) Update(u Type) (Type, error) {
 	name := u.Key()
 	if t, found := tr.Types[name]; !found {

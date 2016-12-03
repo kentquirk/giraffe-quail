@@ -51,7 +51,13 @@ EnumDefinition <- _ "enum" _ n:Name vals:EnumValueSet {
     }
 
 
-InterfaceDefinition <- _ "interface" _ Name FieldSet
+InterfaceDefinition <- _ "interface" _ n:Name fs:FieldSet {
+        fields := make([]Field, 0)
+        for _, f := range fs.([]Field) {
+            fields = append(fields, f)
+        }
+        return TR.RegisterFields(n.(string), Interface, fields)
+    }
 
 UnionDefinition <- _ "union" _ Name UnionSet
 
@@ -74,13 +80,35 @@ UnionSet <- _ "=" UnionNames
 
 UnionNames <- _ Name (_ "|" _ Name)*
 
-FieldSet <-  _ "{" Field+ _ "}"
+FieldSet <-  _ "{" fields:Field+ _ "}" {
+        fa := make([]Field, 0)
+        for _, f := range fields.([]interface{}) {
+            fa = append(fa, f.(Field))
+        }
+        return fa, nil
+    }
 
-Field <- _ Name Arguments? _ ":" Type
+Field <- _ n:Name args:Arguments? _ ":" t:Type {
+        if args == nil {
+            return Field{N: n.(string), T:t.(Type)}, nil
+        }
+        return Field{N: n.(string), Args:args.([]Field), T:t.(Type)}, nil
+    }
 
-Arguments <- _ '(' Argument+ _ ')'
+Arguments <- _ '(' args:Argument+ _ ')' {
+        fields := make([]Field, 0)
+        for _, a := range args.([]interface{}) {
+            fields = append(fields, a.(Field))
+        }
+        return fields, nil
+    }
 
-Argument <- _ Name _ ':' Type
+Argument <- _ n:Name _ ':' t:Type {
+        name := n.(string)
+        typ := t.(Type)
+        return Field{N: name, T: typ}, nil
+    }
+
 
 Type <-
     ( NonNullType
