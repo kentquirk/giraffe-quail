@@ -54,7 +54,7 @@ func TestRedefineEnumValue(t *testing.T) {
 }
 
 func TestSimpleObj(t *testing.T) {
-	s := `type Cat {
+	s := `type Bear {
             name: String
             }
     `
@@ -66,7 +66,7 @@ func TestSimpleObj(t *testing.T) {
 }
 
 func TestObjImplements(t *testing.T) {
-	s := `type Cat implements Pet {
+	s := `type Ferret implements Pet {
           name: String
         }
     `
@@ -78,7 +78,7 @@ func TestObjImplements(t *testing.T) {
 }
 
 func TestObjNonnullField(t *testing.T) {
-	s := `type Cat {
+	s := `type Pig {
           name: String!
         }
     `
@@ -102,7 +102,7 @@ func TestFieldArgument(t *testing.T) {
 }
 
 func TestFieldMultiArgument(t *testing.T) {
-	s := `type Cat {
+	s := `type Lion {
           doesKnowCommand(catCommand: CatCommand!, whispered: Boolean!): Boolean!
         }
     `
@@ -114,7 +114,7 @@ func TestFieldMultiArgument(t *testing.T) {
 }
 
 func TestComplexObj(t *testing.T) {
-	s := `type Cat implements Pet {
+	s := `type HouseCat implements Pet {
           name: String!
           nickname: String
           doesKnowCommand(catCommand: CatCommand!): Boolean!

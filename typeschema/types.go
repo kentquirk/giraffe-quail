@@ -114,18 +114,20 @@ func NewTypeRegistry() *TypeRegistry {
 // Register adds a type by name to the type registry. It is an error if the type
 // already exists.
 func (tr *TypeRegistry) Register(name string, k Kind, subtypes ...Type) (Type, error) {
-	return tr.RegisterFields(name, k, nil, subtypes...)
+	return tr.RegisterWithFields(name, k, nil, subtypes...)
 }
 
 // Register adds a type by name to the type registry. It is an error if the type
 // already exists.
-func (tr *TypeRegistry) RegisterFields(name string, k Kind, fields []Field, subtypes ...Type) (Type, error) {
+func (tr *TypeRegistry) RegisterWithFields(name string, k Kind, fields []Field, subtypes ...Type) (Type, error) {
+	newtype := Type{Name: name, Kind: k, Subtypes: subtypes, Fields: fields}
 	if t, found := tr.Types[name]; found {
-		return t, errors.New("Type " + name + " already defined.")
+		if t.Kind != Temp {
+			return t, errors.New("Type " + name + " already defined.")
+		}
 	}
-	t := Type{Name: name, Kind: k, Subtypes: subtypes, Fields: fields}
-	tr.Types[name] = t
-	return t, nil
+	tr.Types[name] = newtype
+	return newtype, nil
 }
 
 // Update modifies a type by looking it up by name in the type registry and then

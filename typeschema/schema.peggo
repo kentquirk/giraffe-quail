@@ -32,7 +32,13 @@ Definition <-
     / UnionDefinition
     )
 
-ObjTypeDefinition <- _ "type" _ Name Implements? FieldSet
+ObjTypeDefinition <- _ "type" _ n:Name i:Implements? fs:FieldSet {
+        fields := make([]Field, 0)
+        for _, f := range fs.([]Field) {
+            fields = append(fields, f)
+        }
+        return TR.RegisterWithFields(n.(string), Obj, fields)
+    }
 
 EnumDefinition <- _ "enum" _ n:Name vals:EnumValueSet {
         enumname := n.(string)
@@ -56,13 +62,15 @@ InterfaceDefinition <- _ "interface" _ n:Name fs:FieldSet {
         for _, f := range fs.([]Field) {
             fields = append(fields, f)
         }
-        return TR.RegisterFields(n.(string), Interface, fields)
+        return TR.RegisterWithFields(n.(string), Interface, fields)
     }
 
 UnionDefinition <- _ "union" _ Name UnionSet
 
 // Implements can only have the name of an Object Type
-Implements <- _ "implements" _ Name
+Implements <- _ "implements" _ n:Name {
+        return TR.MaybeGet(n.(string))
+    }
 
 EnumValueSet <- _ "{" ev:EnumValues _ "}" { return ev, nil }
 
