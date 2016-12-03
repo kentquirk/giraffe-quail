@@ -15,6 +15,9 @@
 
 {
     package typeschema
+
+    var TR *TypeRegistry
+    var VR *ValueRegistry
 }
 
 // Documents
@@ -31,7 +34,22 @@ Definition <-
 
 ObjTypeDefinition <- _ "type" _ Name Implements? FieldSet
 
-EnumDefinition <- _ "enum" _ Name EnumValueSet
+EnumDefinition <- _ "enum" _ n:Name vals:EnumValueSet {
+        enumname := n.(string)
+        enumtype, err := TR.Register(enumname, Enum)
+        if err != nil {
+            return enumtype, err
+        }
+        for _, v := range vals.([]string) {
+            enumvalue := v
+            _, err := VR.Register(enumvalue, Value{T:enumtype, V:enumvalue})
+            if err != nil {
+                return enumtype, err
+            }
+        }
+        return enumtype, nil
+    }
+
 
 InterfaceDefinition <- _ "interface" _ Name FieldSet
 
@@ -40,9 +58,17 @@ UnionDefinition <- _ "union" _ Name UnionSet
 // Implements can only have the name of an Object Type
 Implements <- _ "implements" _ Name
 
-EnumValueSet <- _ "{" EnumValues _ "}"
+EnumValueSet <- _ "{" ev:EnumValues _ "}" { return ev, nil }
 
-EnumValues <- (_ Name)+
+EnumValues <- evs:EnumValue+ {
+    r := make([]string, 0)
+    for _, n := range evs.([]interface{}) {
+        r = append(r, n.(string))
+    }
+    return r, nil
+}
+
+EnumValue <- _ n:Name { return n.(string), nil }
 
 UnionSet <- _ "=" UnionNames
 
@@ -59,27 +85,16 @@ Argument <- _ Name _ ':' Type
 Type <-
     ( NonNullType
     / ListType
-    / ScalarType
     / NamedType
     )
 
-// we may want to replace this with just Name but do a lookup to determine type
-ScalarType <-
-    ( _ "Int"
-    / _ "Float"
-    / _ "String"
-    / _ "Boolean"
-    / _ "ID"
-    )
+NamedType <- _ n:Name { return TR.MaybeGet(n.(string)) }
 
-NamedType <- _ n:Name
-
-ListType <- _ '[' _ t:Type _ ']'
+ListType <- _ '[' _ t:Type _ ']' { return TR.MaybeGet(TypeNameFor(List, t.(Type).Key())) }
 
 NonNullType <-
-    ( t:ListType
-    / t:ScalarType '!'
-    / t:NamedType '!'
+    ( t:ListType '!'  { return TR.MaybeGet(TypeNameFor(NonNullable, t.(Type).Key())) }
+    / t:NamedType '!' { return TR.MaybeGet(TypeNameFor(NonNullable, t.(Type).Key())) }
     )
 
 

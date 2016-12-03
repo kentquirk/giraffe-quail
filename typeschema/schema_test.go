@@ -8,6 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMain(tm *testing.M) {
+	TR = NewTypeRegistry()
+	VR = NewValueRegistry()
+
+	tm.Run()
+}
+
 func DumpErrors(err error) {
 	list := err.(errList)
 	for _, err := range list {
@@ -17,7 +24,7 @@ func DumpErrors(err error) {
 }
 
 func TestSingleEnum(t *testing.T) {
-	s := `enum DogCommand { SIT }`
+	s := `enum CatCommand { JUMP }`
 	_, err := Parse("schematest", []byte(s))
 	if err != nil {
 		DumpErrors(err)
@@ -26,12 +33,24 @@ func TestSingleEnum(t *testing.T) {
 }
 
 func TestMultiEnum(t *testing.T) {
-	s := `enum DogCommand { SIT, DOWN, HEEL }`
+	s := `enum DogCommands { SIT, DOWN, HEEL }`
 	_, err := Parse("schematest", []byte(s))
 	if err != nil {
 		DumpErrors(err)
 	}
 	assert.Nil(t, err)
+}
+
+func TestRedefineEnum(t *testing.T) {
+	s := `enum CatCommand { SLEEP }`
+	_, err := Parse("schematest", []byte(s))
+	assert.NotNil(t, err)
+}
+
+func TestRedefineEnumValue(t *testing.T) {
+	s := `enum FishCommand { JUMP }`
+	_, err := Parse("schematest", []byte(s))
+	assert.NotNil(t, err)
 }
 
 func TestSimpleObj(t *testing.T) {
@@ -141,5 +160,7 @@ func checkOneFile(t *testing.T, filename string) {
 }
 
 func TestPets(t *testing.T) {
+	TR = NewTypeRegistry()
+	VR = NewValueRegistry()
 	checkOneFile(t, "tests/pets.schema")
 }
