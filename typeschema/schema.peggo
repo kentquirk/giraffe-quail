@@ -21,9 +21,7 @@
 }
 
 // Documents
-Document <-
-    ( Definition+ _ EOF
-    )
+Document <- Definition+ _ EOF
 
 Definition <-
     ( ObjTypeDefinition

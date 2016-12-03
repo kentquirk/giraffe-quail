@@ -50,6 +50,7 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     * Implemented Enum where the enum name is a type and the enum values are value objects containing strings but marked with the enum type. It is passing tests.
     * Implemented FieldSets and Interfaces and Obj
     * Temporary types are resolved if defined later
+    * Implemented Union
 
 * Dec 2 - (5 hrs) - Abbreviated work day plus some evening time.
     * Starting building some tests for the schema parser; found a few minor bugs in the .peggo file but now have a full set of tests working, and it parses the example grammar used in an explanatory page. Now I have to have it start building type definitions.
