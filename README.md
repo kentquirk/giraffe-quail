@@ -45,7 +45,13 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The worklog
 
-* Dec 2 - () - Starting building some tests for the schema parser; found a few minor bugs in the .peggo file but now have a full set of tests working, and it parses the example grammar used in an explanatory page. Now I have to have it start building type definitions.
+* Dec 3 - (2) - Saturday
+    * Now have a type registry and a value registry that I'm pretty happy with
+    * Implemented Enum where the enum name is a type and the enum values are value objects containing strings but marked with the enum type. It is passing tests.
+
+* Dec 2 - (5 hrs) - Abbreviated work day plus some evening time.
+    * Starting building some tests for the schema parser; found a few minor bugs in the .peggo file but now have a full set of tests working, and it parses the example grammar used in an explanatory page. Now I have to have it start building type definitions.
+    * Decided my approach to type registry and values was not quite right; rewriting it.
 
 * Dec 1 - (5 hrs) - Well, so much for GoCoWriMo -- I was sick and then life got in the way. Now I'm finally getting back to it. The good news is that I've been able to fit this into my job, so I do have some time to work on it now.
     * Today I got a collection of data types and variables and values working, so I'm starting to build some useful data structures here.
