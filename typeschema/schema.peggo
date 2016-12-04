@@ -45,7 +45,7 @@ EnumDefinition <- _ "enum" _ n:Name vals:EnumValueSet {
         }
         for _, v := range vals.([]string) {
             enumvalue := v
-            _, err := GlobalScope.Register(enumvalue, types.Value{T:enumtype, V:enumvalue})
+            _, err := GlobalScope.Create(enumvalue, types.Value{T:enumtype, V:enumvalue})
             if err != nil {
                 return enumtype, err
             }

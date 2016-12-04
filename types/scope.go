@@ -11,9 +11,9 @@ func NewScope() *Scope {
 	return sc
 }
 
-// Register sets up a value in the scope. It is an error if the name
+// Create sets up a value in the scope. It is an error if the name
 // already exists.
-func (sc *Scope) Register(name string, v Value) (Value, error) {
+func (sc *Scope) Create(name string, v Value) (Value, error) {
 	if _, found := sc.Values[name]; found {
 		return v, errors.New("Value " + name + " already defined; cannot be overridden.")
 	}
