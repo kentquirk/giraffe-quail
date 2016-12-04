@@ -19,7 +19,7 @@
     import "github.com/kentquirk/giraffe-quail/types"
 
     var TR *types.TypeRegistry
-    var VR *types.ValueRegistry
+    var GlobalScope *types.Scope
 }
 
 // Documents
@@ -82,7 +82,7 @@ Value <-
     / ObjectValue
     )
 
-IntValue <- IntegerPart { return typereg.ParseInt(string(c.text)) }
+IntValue <- IntegerPart { return TR.ParseInt(string(c.text)) }
 IntegerPart <-
     ( NegativeSign? '0'
     / NegativeSign? NonZeroDigit Digit*
@@ -92,20 +92,20 @@ FloatValue <-
     ( IntegerPart FractionalPart
     / IntegerPart ExponentPart
     / IntegerPart FractionalPart ExponentPart
-    ) { return typereg.ParseFloat(string(c.text)) }
+    ) { return TR.ParseFloat(string(c.text)) }
 FractionalPart <- '.' Digit+
 ExponentPart <- ExponentIndicator Sign? Digit+
 
 BooleanValue <-
-    ( _ "true" { return typereg.MakeBool(true), nil }
-    / _ "false" { return typereg.MakeBool(false), nil }
+    ( _ "true" { return TR.MakeBool(true), nil }
+    / _ "false" { return TR.MakeBool(false), nil }
     )
 
 StringValue <-
-    ( _ '"' '"' { return typereg.MakeStr(""), nil }
-    / _ '"' s:StringChars '"' { return typereg.MakeStr(s.(string)), nil }
+    ( _ '"' '"' { return TR.MakeStr(""), nil }
+    / _ '"' s:StringChars '"' { return TR.MakeStr(s.(string)), nil }
     / _ '"' s:StringChars !'"' {
-        return typereg.MakeStr(s.(string)), c.NewError("Missing close quote for string.", "SV-1")
+        return TR.MakeStr(s.(string)), c.NewError("Missing close quote for string.", "SV-1")
         }
     )
 
@@ -118,59 +118,75 @@ StringCharacter <-
     / '\\' EscapedCharacter
     ) { return c.text, nil }
 
-NullValue <- _ "null" { return typereg.MakeNull(), nil }
+NullValue <- _ "null" { return TR.MakeNull(), nil }
 
 EnumValue <- Name
-    { return typereg.FindEnum(string(c.text)) }
+    { return GlobalScope.Get(string(c.text)) }
 
 ListValue <-
-    ( _ '[' _ ']' { return typereg.MakeList(), nil }
-    / _ '[' va:(_ Value)+ ']' {
+    ( _ '[' _ ']' { return TR.MakeEmptyList(), nil }
+    / _ '[' va:(OneValue)+ ']' {
             values := va.([]interface{})
-            list := typereg.MakeListOf(values[0].(Value).T);
+            list := TR.MakeListOf(values[0].(types.Value).T);
             for _, v := range values {
-                list.Append(v.(Value))
+                err := list.Append(v.(types.Value))
+                if err != nil {
+                    return list, c.WrapError(err, "LV-1")
+                }
             }
             return list, nil
         }
-    / _ '[' (_ Value)+ !']' {
-            return typereg.MakeList(), c.NewError("Missing close square bracket for list.", "LV-1")
+    / _ '[' (OneValue)+ !']' {
+            return TR.MakeEmptyList(), c.NewError("Missing close square bracket for list.", "LV-2")
         }
     )
 
+OneValue <- _ v:Value { return v, nil }
+
 ObjectValue <-
-    ( _ '{' _ '}' { return typereg.MakeNamelessObj(), nil }
+    ( _ '{' _ '}' { return TR.MakeNamelessObj(), nil }
     / _ '{' oa:ObjectField+ _ '}' {
-            obj := typereg.MakeNamelessObj()
+            obj := TR.MakeNamelessObj()
             fields := oa.([]interface{})
             for _, v := range fields  {
-                // the ObjectField is a Value where the N field is the name
-                // of the field, and the V field is a nested Value object
-                obj.SetField(v.(Value))
+                f := v.(types.NamedValue)
+                err := obj.SetField(f.N, f.V)
+                if err != nil {
+                    return obj, c.WrapError(err, "OV-1")
+                }
             }
             return obj, nil
         }
     / _ '{' oa:ObjectField+ _ !'}' {
-            return typereg.MakeNamelessObj(), c.NewError("Missing close curly brace for object.", "OV-1")
+            return TR.MakeNamelessObj(), c.NewError("Missing close curly brace for object.", "OV-2")
         }
     )
 
-ObjectField <- _ n:Name _ ':' _ v:Value { return Value{N:n.(string), V:v}, nil }
+ObjectField <- _ n:Name _ ':' _ v:Value {
+        return types.NamedValue{N:n.(string), V:v.(types.Value)}, nil
+    }
 
 
-// Variables
-Variable <- _ '$' Name { return Variable{N:string(c.text)}, nil }
+// Variable
+Variable <- _ '$' n:Name { return "$"+n.(string), nil }
 
 VariableDefinitions <- _ '(' _ VariableDefinition+ _ ')'
 
-VariableDefinition <- _ vi:Variable _ ':' _ ti:Type dvi:DefaultValue?
+VariableDefinition <- _ n:Variable _ ':' _ ti:Type dvi:DefaultValue?
     {
-        v := vi.(Variable)
-        t := ti.(Type)
-        dv := dvi.(Value)
-        v.T = t
-        v.V = dv
-        return v, nil
+        name := n.(string)
+        t := ti.(types.Type)
+        v, err := TR.MakeValueOf(t)
+        if err != nil {
+            return TR.MakeNull(), c.WrapError(err, "VD-1")
+        }
+        if dvi != nil {
+            err := v.Set(dvi.(types.Value))
+            if err != nil {
+                return TR.MakeNull(), c.WrapError(err, "VD-2")
+            }
+        }
+        return GlobalScope.Create(name, v)
     }
 
 DefaultValue <- _ '=' _ Value
@@ -182,13 +198,19 @@ Type <-
     / NamedType
     )
 
-NamedType <- n:Name { return typereg.Get(n.(string)) }
+NamedType <- n:Name { return TR.Get(n.(string)) }
 
-ListType <- _ '[' _ t:Type _ ']' { return ListType{Contains:t.(Type)}, nil }
+ListType <- _ '[' _ t:Type _ ']' {
+        return TR.ListType(t.(types.Type)), nil
+    }
 
 NonNullType <-
-    ( t:NamedType '!' { return NonNullType{Contains:t.(Type)}, nil }
-    / t:ListType '!' { return NonNullType{Contains:t.(Type)}, nil }
+    ( t:NamedType '!' {
+            return TR.NonNullableType(t.(types.Type)), nil
+        }
+    / t:NonNullType '!' {
+            return TR.NonNullableType(t.(types.Type)), nil
+        }
     )
 
 // Directives

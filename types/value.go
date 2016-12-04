@@ -17,6 +17,11 @@ type Value struct {
 	V interface{}
 }
 
+type NamedValue struct {
+	N string
+	V Value
+}
+
 func (v *Value) String() string {
 	return fmt.Sprintf("%v <%s>", v.V, v.T.String())
 }
@@ -70,4 +75,17 @@ func (v *Value) SetField(name string, val Value) error {
 	}
 	m[name] = val
 	return nil
+}
+
+// Set sets a value from another value, if it's compatible
+func (v *Value) Set(other Value) error {
+	if v.T.Key() == other.T.Key() {
+		v.V = other.V
+		return nil
+	}
+
+	// needs a lot more here
+
+	return errors.New(fmt.Sprintf("Incompatible types: <%s> and <%s>",
+		v.T.String(), other.T.String()))
 }
