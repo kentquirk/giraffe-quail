@@ -16,8 +16,10 @@
 {
     package typeschema
 
-    var TR *TypeRegistry
-    var VR *ValueRegistry
+    import "github.com/kentquirk/giraffe-quail/types"
+
+    var TR *types.TypeRegistry
+    var VR *types.ValueRegistry
 }
 
 // Documents
@@ -31,22 +33,22 @@ Definition <-
     )
 
 ObjTypeDefinition <- _ "type" _ n:Name i:Implements? fs:FieldSet {
-        fields := make([]Field, 0)
-        for _, f := range fs.([]Field) {
+        fields := make([]types.Field, 0)
+        for _, f := range fs.([]types.Field) {
             fields = append(fields, f)
         }
-        return TR.RegisterWithFields(n.(string), Obj, fields)
+        return TR.RegisterWithFields(n.(string), types.Obj, fields)
     }
 
 EnumDefinition <- _ "enum" _ n:Name vals:EnumValueSet {
         enumname := n.(string)
-        enumtype, err := TR.Register(enumname, Enum)
+        enumtype, err := TR.Register(enumname, types.Enum)
         if err != nil {
             return enumtype, err
         }
         for _, v := range vals.([]string) {
             enumvalue := v
-            _, err := VR.Register(enumvalue, Value{T:enumtype, V:enumvalue})
+            _, err := VR.Register(enumvalue, types.Value{T:enumtype, V:enumvalue})
             if err != nil {
                 return enumtype, err
             }
@@ -56,17 +58,17 @@ EnumDefinition <- _ "enum" _ n:Name vals:EnumValueSet {
 
 
 InterfaceDefinition <- _ "interface" _ n:Name fs:FieldSet {
-        fields := make([]Field, 0)
-        for _, f := range fs.([]Field) {
+        fields := make([]types.Field, 0)
+        for _, f := range fs.([]types.Field) {
             fields = append(fields, f)
         }
-        return TR.RegisterWithFields(n.(string), Interface, fields)
+        return TR.RegisterWithFields(n.(string), types.Interface, fields)
     }
 
 UnionDefinition <- _ "union" _ n:Name us:UnionSet {
         unionname := n.(string)
-        subtypes := us.([]Type)
-        return TR.Register(unionname, Union, subtypes...)
+        subtypes := us.([]types.Type)
+        return TR.Register(unionname, types.Union, subtypes...)
     }
 
 UnionSet <- _ "=" un:UnionNames { return un, nil }
@@ -75,7 +77,7 @@ UnionNames <-
     ( _ fn:Name mn:AnotherName+ {
             firstname := fn.(string)
             firsttype, err := TR.MaybeGet(firstname)
-            types := []Type{firsttype}
+            types := []types.Type{firsttype}
             if err != nil {
                 return types, err
             }
@@ -92,7 +94,7 @@ UnionNames <-
     / _ fn:Name {
             firstname := fn.(string)
             firsttype, _ := TR.MaybeGet(firstname)
-            types := []Type{firsttype}
+            types := []types.Type{firsttype}
             return types, errors.New("A union must specify at least two types.")
         }
     )
@@ -118,32 +120,32 @@ EnumValue <- _ n:Name { return n.(string), nil }
 AnotherName <- _ "|" _ n:Name { return n.(string), nil }
 
 FieldSet <-  _ "{" fields:Field+ _ "}" {
-        fa := make([]Field, 0)
+        fa := make([]types.Field, 0)
         for _, f := range fields.([]interface{}) {
-            fa = append(fa, f.(Field))
+            fa = append(fa, f.(types.Field))
         }
         return fa, nil
     }
 
 Field <- _ n:Name args:Arguments? _ ":" t:Type {
         if args == nil {
-            return Field{N: n.(string), T:t.(Type)}, nil
+            return types.Field{N: n.(string), T:t.(types.Type)}, nil
         }
-        return Field{N: n.(string), Args:args.([]Field), T:t.(Type)}, nil
+        return types.Field{N: n.(string), Args:args.([]types.Field), T:t.(types.Type)}, nil
     }
 
 Arguments <- _ '(' args:Argument+ _ ')' {
-        fields := make([]Field, 0)
+        fields := make([]types.Field, 0)
         for _, a := range args.([]interface{}) {
-            fields = append(fields, a.(Field))
+            fields = append(fields, a.(types.Field))
         }
         return fields, nil
     }
 
 Argument <- _ n:Name _ ':' t:Type {
         name := n.(string)
-        typ := t.(Type)
-        return Field{N: name, T: typ}, nil
+        typ := t.(types.Type)
+        return types.Field{N: name, T: typ}, nil
     }
 
 
@@ -155,11 +157,11 @@ Type <-
 
 NamedType <- _ n:Name { return TR.MaybeGet(n.(string)) }
 
-ListType <- _ '[' _ t:Type _ ']' { return TR.MaybeGet(TypeNameFor(List, t.(Type).Key())) }
+ListType <- _ '[' _ t:Type _ ']' { return TR.MaybeGet(types.TypeNameFor(types.List, t.(types.Type).Key())) }
 
 NonNullType <-
-    ( t:ListType '!'  { return TR.MaybeGet(TypeNameFor(NonNullable, t.(Type).Key())) }
-    / t:NamedType '!' { return TR.MaybeGet(TypeNameFor(NonNullable, t.(Type).Key())) }
+    ( t:ListType '!'  { return TR.MaybeGet(types.TypeNameFor(types.NonNullable, t.(types.Type).Key())) }
+    / t:NamedType '!' { return TR.MaybeGet(types.TypeNameFor(types.NonNullable, t.(types.Type).Key())) }
     )
 
 

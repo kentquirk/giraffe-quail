@@ -1,99 +1,9 @@
-package typeschema
+package types
 
 import (
 	"errors"
-	"strings"
+	"strconv"
 )
-
-type Kind int
-
-const (
-	Null        Kind = iota
-	Scalar      Kind = iota
-	Enum        Kind = iota
-	Obj         Kind = iota
-	Interface   Kind = iota
-	List        Kind = iota
-	NonNullable Kind = iota
-	Union       Kind = iota
-	Temp        Kind = iota
-)
-
-// these are the canonical names for the fundamental scalar types
-const (
-	T_String  = "String"
-	T_Int     = "Int"
-	T_Float   = "Float"
-	T_Boolean = "Boolean"
-	T_ID      = "ID"
-	T_Null    = "*NULL*"
-)
-
-// Type is the structure that contains information about a GraphQL Type.
-// The Kind of type determines how it stores information. An attempt
-// was made to use Go's type system to do this, by defining an interface
-// that Type would implement, but it started getting pretty big, and the
-// code to use it was getting cumbersome. Instead, we're going to
-// just switch on the Kind value instead and we can reuse a lot of things
-// between the different Kinds.
-// Here's the behavior of different types:
-//
-// Kind         Subtypes/Fields
-// -----------  --------------------------------------------------------
-// Null         nil
-// Scalar       nil
-// Enum         nil, with Values of this type stored in the value registry
-// Obj          nil, Fields contains an ordered list of fields
-// Interface    just like obj
-// List         Subtypes[0] contains the type of the list
-// NonNullable  Subtypes[0] contains the nonnullable type
-// Union        Subtypes contains a list of the types in the union
-// Temp         nil
-type Type struct {
-	Name     string
-	Kind     Kind
-	Subtypes []Type
-	Fields   []Field
-}
-
-// A field is a Name and a Type, used in Obj (and Interface) types,
-// as well as in the Arg list for a field.
-type Field struct {
-	N    string
-	Args []Field
-	T    Type
-}
-
-// Key returns the unique name of this type
-func (t Type) Key() string {
-	switch t.Kind {
-	case Union:
-		stnames := make([]string, 0)
-		for _, st := range t.Subtypes {
-			stnames = append(stnames, st.Key())
-		}
-		return TypeNameFor(t.Kind, stnames...)
-	case List, NonNullable:
-		return TypeNameFor(t.Kind, t.Subtypes[0].Key())
-	default:
-		return TypeNameFor(t.Kind, t.Name)
-	}
-}
-
-// TypeNameFor takes a kind and a list of names and returns a unique
-// name given that combination
-func TypeNameFor(k Kind, names ...string) string {
-	switch k {
-	case List:
-		return "[" + names[0] + "]"
-	case NonNullable:
-		return names[0] + "!"
-	case Union:
-		return strings.Join(names, "|")
-	default:
-		return names[0]
-	}
-}
 
 type TypeRegistry struct {
 	Types map[string]Type
@@ -194,4 +104,38 @@ func (tr *TypeRegistry) Bool() Type {
 // Null is a convenience method for retrieving the standard Null type
 func (tr *TypeRegistry) Null() Type {
 	return tr.MustGet(T_Null)
+}
+
+func (tr *TypeRegistry) MakeInt(v int) Value {
+	return Value{T: tr.Int(), V: v}
+}
+
+func (tr *TypeRegistry) MakeFloat(v float64) Value {
+	return Value{T: tr.Float(), V: v}
+}
+
+func (tr *TypeRegistry) MakeStr(v string) Value {
+	return Value{T: tr.Str(), V: v}
+}
+
+func (tr *TypeRegistry) MakeBool(v bool) Value {
+	return Value{T: tr.Bool(), V: v}
+}
+
+func (tr *TypeRegistry) MakeNull() Value {
+	return Value{T: tr.Null(), V: nil}
+}
+
+// ParseInt constructs an Int Value object from a string formatted as an integer.
+func (tr *TypeRegistry) ParseInt(s string) (Value, error) {
+	v, err := strconv.ParseInt(s, 10, 32)
+	val := tr.MakeInt(int(v))
+	return val, err
+}
+
+// ParseFloat constructs a Float Value object from a string formatted as a float.
+func (tr *TypeRegistry) ParseFloat(s string) (Value, error) {
+	v, err := strconv.ParseFloat(s, 64)
+	val := tr.MakeFloat(v)
+	return val, err
 }

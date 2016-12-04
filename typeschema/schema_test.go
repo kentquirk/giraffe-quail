@@ -5,12 +5,13 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/kentquirk/giraffe-quail/types"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(tm *testing.M) {
-	TR = NewTypeRegistry()
-	VR = NewValueRegistry()
+	TR = types.NewTypeRegistry()
+	VR = types.NewValueRegistry()
 
 	tm.Run()
 }
@@ -160,7 +161,7 @@ func checkOneFile(t *testing.T, filename string) {
 }
 
 func TestPets(t *testing.T) {
-	TR = NewTypeRegistry()
-	VR = NewValueRegistry()
+	TR = types.NewTypeRegistry()
+	VR = types.NewValueRegistry()
 	checkOneFile(t, "tests/pets.schema")
 }
