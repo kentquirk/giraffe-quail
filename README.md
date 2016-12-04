@@ -45,7 +45,11 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The worklog
 
-* Dec 3 - (2) - Saturday
+* Dec 4 - (4 hrs) - Sunday
+    * I realized that ValueRegistry is really a Scope, so renamed it.
+    * Now parser is using the type registry. It's not tested yet, and value assignment only code to work if types are identical. Lots more work to do but I want to start testing it.
+
+* Dec 3 - (4 hrs) - Saturday
     * Now have a type registry and a value registry that I'm pretty happy with
     * Implemented Enum where the enum name is a type and the enum values are value objects containing strings but marked with the enum type. It is passing tests.
     * Implemented FieldSets and Interfaces and Obj
