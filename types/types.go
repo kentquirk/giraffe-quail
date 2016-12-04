@@ -1,6 +1,9 @@
 package types
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
 
 type Kind int
 
@@ -42,7 +45,7 @@ const (
 // Enum         nil, with Values of this type stored in the value registry
 // Obj          nil, Fields contains an ordered list of fields
 // Interface    just like obj
-// List         Subtypes[0] contains the type of the list
+// List         Subtypes[0] contains the type of the list; an empty list may have no subtype.
 // NonNullable  Subtypes[0] contains the nonnullable type
 // Union        Subtypes contains a list of the types in the union
 // Temp         nil
@@ -75,6 +78,52 @@ func (t Type) Key() string {
 	default:
 		return TypeNameFor(t.Kind, t.Name)
 	}
+}
+
+func (t Type) String() string {
+	return t.Key()
+}
+
+func (t Type) Is(other Type) bool {
+	if t.Kind != other.Kind || t.Name != other.Name {
+		return false
+	}
+	if len(t.Subtypes) != len(other.Subtypes) {
+		return false
+	}
+	switch t.Kind {
+	case List, Union, NonNullable:
+		for i := range t.Subtypes {
+			if !t.Subtypes[i].Is(other.Subtypes[i]) {
+				return false
+			}
+		}
+	}
+	return false
+}
+
+func (t Type) HasField(name string) bool {
+	if t.Kind != Obj {
+		return false
+	}
+	for _, f := range t.Fields {
+		if f.N == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (t Type) GetField(name string) (Field, error) {
+	if t.Kind != Obj {
+		return Field{}, errors.New("GetField on non-object.")
+	}
+	for _, f := range t.Fields {
+		if f.N == name {
+			return f, nil
+		}
+	}
+	return Field{}, errors.New("Field not found: " + name)
 }
 
 // TypeNameFor is a free function that takes a kind and a list of names and

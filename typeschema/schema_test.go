@@ -9,7 +9,7 @@ import (
 
 func TestMain(tm *testing.M) {
 	TR = types.NewTypeRegistry()
-	VR = types.NewValueRegistry()
+	GlobalScope = types.NewScope()
 
 	tm.Run()
 }

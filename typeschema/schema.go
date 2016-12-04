@@ -8,33 +8,33 @@ import (
 )
 
 var TR *types.TypeRegistry
-var VR *types.ValueRegistry
+var GlobalScope *types.Scope
 
 // ParseString parses a schema string and turns it into type and value registries.
-// It resets the TR and VR global pointers to new values and returns them.
+// It resets the TR and GlobalScope global pointers to new values and returns them.
 // if error is non-nil, it's an errList from the parser.
-func LoadSchemaFromString(s string) (*types.TypeRegistry, *types.ValueRegistry, error) {
+func LoadSchemaFromString(s string) (*types.TypeRegistry, *types.Scope, error) {
 	TR = types.NewTypeRegistry()
-	VR = types.NewValueRegistry()
+	GlobalScope = types.NewScope()
 
 	_, err := Parse("string", []byte(s))
-	return TR, VR, err
+	return TR, GlobalScope, err
 }
 
 // ParseFile parses a schema from a file and turns it into type and value registries.
-// It resets the TR and VR global pointers to new values and returns them.
+// It resets the TR and GlobalScope global pointers to new values and returns them.
 // Could return a normal error if file couldn't be read, or an errList from the parser
 // if the file was good but had errors.
-func LoadSchemaFromFile(filename string) (*types.TypeRegistry, *types.ValueRegistry, error) {
+func LoadSchemaFromFile(filename string) (*types.TypeRegistry, *types.Scope, error) {
 	TR = types.NewTypeRegistry()
-	VR = types.NewValueRegistry()
+	GlobalScope = types.NewScope()
 
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, nil, err
 	}
 	_, err = Parse(filename, b)
-	return TR, VR, err
+	return TR, GlobalScope, err
 }
 
 func DumpErrors(err error) {

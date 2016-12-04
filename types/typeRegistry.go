@@ -126,6 +126,24 @@ func (tr *TypeRegistry) MakeNull() Value {
 	return Value{T: tr.Null(), V: nil}
 }
 
+// MakeEmptyList constructs a Value that has a type that is a List
+// where the type's Subtypes list is empty.
+// It also contains an empty array of Value objects.
+func (tr *TypeRegistry) MakeEmptyList() Value {
+	return Value{T: Type{Kind: List, Subtypes: []Type{}}, V: make([]Value, 0)}
+}
+
+// MakeListOf constructs a Value that has a type that is a List
+// and contains an empty array of Value objects.
+func (tr *TypeRegistry) MakeListOf(listType Type) Value {
+	return Value{T: Type{Kind: List, Subtypes: []Type{listType}}, V: make([]Value, 0)}
+}
+
+func (tr *TypeRegistry) MakeNamelessObj() Value {
+	// This makes a Value for a nameless, empty ObjType
+	return Value{T: Type{Kind: Obj, Fields: make([]Field, 0)}, V: make(map[string]Value)}
+}
+
 // ParseInt constructs an Int Value object from a string formatted as an integer.
 func (tr *TypeRegistry) ParseInt(s string) (Value, error) {
 	v, err := strconv.ParseInt(s, 10, 32)
