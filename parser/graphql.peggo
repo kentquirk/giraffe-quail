@@ -16,10 +16,10 @@
 {
     package parser
 
-    var typereg TypeRegistry
-    func init() {
-        typereg = CreateTypeRegistry()
-    }
+    import "github.com/kentquirk/giraffe-quail/types"
+
+    var TR *types.TypeRegistry
+    var VR *types.ValueRegistry
 }
 
 // Documents

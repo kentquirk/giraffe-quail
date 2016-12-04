@@ -17,9 +17,6 @@
     package typeschema
 
     import "github.com/kentquirk/giraffe-quail/types"
-
-    var TR *types.TypeRegistry
-    var VR *types.ValueRegistry
 }
 
 // Documents

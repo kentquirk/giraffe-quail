@@ -1,8 +1,6 @@
 package typeschema
 
 import (
-	"fmt"
-	"io/ioutil"
 	"testing"
 
 	"github.com/kentquirk/giraffe-quail/types"
@@ -14,14 +12,6 @@ func TestMain(tm *testing.M) {
 	VR = types.NewValueRegistry()
 
 	tm.Run()
-}
-
-func DumpErrors(err error) {
-	list := err.(errList)
-	for _, err := range list {
-		pe := err.(*parserError)
-		fmt.Printf("%+v\n", pe)
-	}
 }
 
 func TestSingleEnum(t *testing.T) {
@@ -150,18 +140,10 @@ func TestUnion(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func checkOneFile(t *testing.T, filename string) {
-	b, err := ioutil.ReadFile(filename)
-	assert.Nil(t, err)
-	_, err = Parse(filename, b)
+func TestPets(t *testing.T) {
+	_, _, err := LoadSchemaFromFile("tests/pets.schema")
 	if err != nil {
 		DumpErrors(err)
 	}
 	assert.Nil(t, err)
-}
-
-func TestPets(t *testing.T) {
-	TR = types.NewTypeRegistry()
-	VR = types.NewValueRegistry()
-	checkOneFile(t, "tests/pets.schema")
 }
