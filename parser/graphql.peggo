@@ -17,9 +17,6 @@
     package parser
 
     import "github.com/kentquirk/giraffe-quail/types"
-
-    var TR *types.TypeRegistry
-    var GlobalScope *types.Scope
 }
 
 // Documents

@@ -6,6 +6,9 @@ Every year in November I have friends try NaNoWriMo (National Novel Writing Mont
 
 So I'm embracing and extending it. Let's call it GoCoWriMo -- Go Code Writing Month.
 
+## The reality
+I got sick in the middle of the month, had Thanksgiving and also a couple of work-related crises -- so getting this done by mid-Nov didn't happen. But it's still underway and looking a lot more like a reasonable reality.
+
 ## The project
 I've been experimenting lately with GraphQL. I really like it -- to me, it's that thing I'd want to build on top of a RESTful API but can never justify because I don't have the resources to spend to build something that big for the kinds of projects I've had. It's a nice design, but it's overkill for any one project. Only an organization on the scale of a Facebook (with a really broad array of applications that could use it) can justify the engineering time to design and build it the first time.
 
@@ -31,23 +34,24 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     - [x] define all the tokens
     - [x] smoketest the parser (build a recognizer testbed)
     - [x] write or acquire a bunch of parser tests - probably can steal test cases from the graphql implementation in Node. (I have nowhere near enough tests, but at the moment there are enough to move on to other things.)
-    - [ ] create a parser test suite
+    - [x] create a parser test suite
     - [x] fix the problems the grammar tests find
-    - [ ] start adding error productions and build an error reporting mechanism
+    - [x] start adding error productions and build an error reporting mechanism
+- [x] Schema
+    - [x] Create a schema definition language parser
+    - [x] Test it on some standard schema
+    - [x] Make it generate type definitions for the graphql parser
 - [ ] Data structures
     - [x] design a parser data structure
     - [ ] get the parser to produce it
-- [ ] Schema
-    - [x] Create a schema definition language parser
-    - [x] Test it on some standard schema
-    - [ ] Make it generate type definitions for the graphql parser
-
 
 ## The worklog
 
-* Dec 4 - (4 hrs) - Sunday
+* Dec 4 - (5 hrs) - Sunday
     * I realized that ValueRegistry is really a Scope, so renamed it.
     * Now parser is using the type registry. It's not tested yet, and value assignment only code to work if types are identical. Lots more work to do but I want to start testing it.
+    * Imported the Star Wars schema from the FB examples; it loaded right away.
+    * Created a small test framework and loaded my test file from it. It too worked, once I imported the starwars schema.
 
 * Dec 3 - (4 hrs) - Saturday
     * Now have a type registry and a value registry that I'm pretty happy with
