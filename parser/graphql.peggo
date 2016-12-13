@@ -21,40 +21,92 @@
 
 // Documents
 Document <-
-    ( Definition+ _ EOF
+    ( defs:Definition+ _ EOF {
+            return defs, nil
+        }
     )
 
 Definition <-
     ( FragmentDefinition
-    / OperationDefinition
+    / op:OperationDefinition {
+            return op, nil
+        }
     )
 
 OperationDefinition <-
-    ( OperationType _ Name? VariableDefinitions? Directives? SelectionSet
-    / SelectionSet
+    ( OperationType _ Name? VariableDefinitions? Directives? ss:SelectionSet {
+            return ss, nil
+        }
+    / ss:SelectionSet {
+            return ss, nil
+        }
     )
 
 OperationType <-
-    ( _ "query"
-    / _ "mutation"
+    ( _ "query" { return "query", nil }
+    / _ "mutation" { return "mutation", nil }
     / _ n:Name { return n, c.NewError("Must be query or mutation.", "OT-1") }
     )
 
-SelectionSet <- _ '{' Selection+ _ '}'
-
-Selection <-
-    ( Field
-    / FragmentSpread
-    / InlineFragment
+SelectionSet <-
+    ( _ '{' sa:Selection+ _ '}' {
+            // use the first element in the array to hold all of them
+            all := types.SelectionSet{}
+            sels := sa.([]interface{})
+            for _, s := range sels {
+                //fmt.Printf("%#v\n", s)
+                for _, f := range s.(types.SelectionSet).Fields {
+                    all.Fields = append(all.Fields, f)
+                }
+            }
+            return all, nil
+        }
+    / _ '{' _ '}' { return nil, c.NewError("Must specify a Selection.", "SS-1") }
     )
 
-Field <- Alias? _ Name Arguments? Directives? SelectionSet?
+Selection <-
+    ( f:Field {
+            ss := types.SelectionSet{
+                Fields: []types.QueryField{f.(types.QueryField)},
+            }
+            return ss, nil
+        }
+    / FragmentSpread { return types.SelectionSet{}, nil } // should error
+    / InlineFragment { return types.SelectionSet{}, nil } // should error
+    )
 
-Arguments <- _ '(' Argument+ _ ')'
+Field <- a:Alias? _ n:Name args:Arguments? Directives? ss:SelectionSet? {
+        name, _ := n.(string)
+        alias, _ := a.(string)
+        selset, _ := ss.(types.SelectionSet)
+        arguments, _ := args.(*types.Scope)
+        f := types.QueryField {
+            Name: name,
+            Alias: alias,
+            Arguments: arguments,
+            SelectionSet: selset,
+        }
+        return f, nil
+    }
 
-Argument <- _ Name _ ':' _ Value
+Arguments <- _ '(' aa:Argument+ _ ')' {
+        args := aa.([]interface{})
+        all := types.NewScope()
+        for _, arg := range args {
+            if err := all.Merge(arg.(*types.Scope)); err != nil {
+                return all, err
+            }
+        }
+        return all, nil
+    }
 
-Alias <- _ Name _ ':'
+Argument <- _ n:Name _ ':' _ v:Value {
+        sc := types.NewScope()
+        sc.Create(n.(string), v.(types.Value))
+        return sc, nil
+    }
+
+Alias <- _ n:Name _ ':' { return n.(string), nil }
 
 FragmentSpread <- _ "..." FragmentName Directives?
 
@@ -68,7 +120,7 @@ InlineFragment <- _ "..." TypeCondition? Directives? SelectionSet
 
 // Values
 Value <-
-    ( Variable
+    ( VariableValue
     / FloatValue
     / IntValue
     / StringValue
@@ -126,8 +178,7 @@ ListValue <-
             values := va.([]interface{})
             list := TR.MakeListOf(values[0].(types.Value).T);
             for _, v := range values {
-                err := list.Append(v.(types.Value))
-                if err != nil {
+                if err := list.Append(v.(types.Value)); err != nil {
                     return list, c.WrapError(err, "LV-1")
                 }
             }
@@ -138,6 +189,8 @@ ListValue <-
         }
     )
 
+VariableValue <- n:VariableName { return GlobalScope.Get(n.(string)) }
+
 OneValue <- _ v:Value { return v, nil }
 
 ObjectValue <-
@@ -147,8 +200,7 @@ ObjectValue <-
             fields := oa.([]interface{})
             for _, v := range fields  {
                 f := v.(types.NamedValue)
-                err := obj.SetField(f.N, f.V)
-                if err != nil {
+                if err := obj.SetField(f.N, f.V); err != nil {
                     return obj, c.WrapError(err, "OV-1")
                 }
             }
@@ -165,11 +217,11 @@ ObjectField <- _ n:Name _ ':' _ v:Value {
 
 
 // Variable
-Variable <- _ '$' n:Name { return "$"+n.(string), nil }
+VariableName <- _ '$' n:Name { return "$"+n.(string), nil }
 
 VariableDefinitions <- _ '(' _ VariableDefinition+ _ ')'
 
-VariableDefinition <- _ n:Variable _ ':' _ ti:Type dvi:DefaultValue?
+VariableDefinition <- _ n:VariableName _ ':' _ ti:Type dvi:DefaultValue?
     {
         name := n.(string)
         t := ti.(types.Type)
@@ -178,8 +230,7 @@ VariableDefinition <- _ n:Variable _ ':' _ ti:Type dvi:DefaultValue?
             return TR.MakeNull(), c.WrapError(err, "VD-1")
         }
         if dvi != nil {
-            err := v.Set(dvi.(types.Value))
-            if err != nil {
+            if err := v.Set(dvi.(types.Value)); err != nil {
                 return TR.MakeNull(), c.WrapError(err, "VD-2")
             }
         }

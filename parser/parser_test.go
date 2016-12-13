@@ -27,11 +27,12 @@ func TestSimpleHero(t *testing.T) {
               }
             }
          `
-	_, err := Parse("querytest", []byte(s))
+	q, err := Parse("querytest", []byte(s))
 	if err != nil {
 		DumpErrors(err)
 	}
 	assert.Nil(t, err)
+	assert.NotNil(t, q)
 }
 
 func TestNotQuery(t *testing.T) {
@@ -50,8 +51,18 @@ func TestUnclosedQuote(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestPets(t *testing.T) {
-	err := LoadQueryFromFile("tests/testqueries.gql")
+func TestStarwars(t *testing.T) {
+	err := LoadQueryFromFile("tests/starwars.gql")
+	if err != nil {
+		DumpErrors(err)
+	}
+	assert.Nil(t, err)
+}
+
+func TestStatus(t *testing.T) {
+	var err error
+	TR, GlobalScope, err = typeschema.LoadSchemaFromFile("tests/status.schema")
+	err = LoadQueryFromFile("tests/status.gql")
 	if err != nil {
 		DumpErrors(err)
 	}

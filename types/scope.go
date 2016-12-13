@@ -39,3 +39,15 @@ func (sc *Scope) MustGet(name string) Value {
 	}
 	panic("Value " + name + " was not found in the scope.")
 }
+
+// Merge copies the values from one scope into another; it is an error if any
+// item already exists
+func (sc *Scope) Merge(from *Scope) error {
+	for n, v := range from.Values {
+		if _, ok := sc.Values[n]; ok {
+			return errors.New("Duplicate name '" + n + "' merging scopes.")
+		}
+		sc.Values[n] = v
+	}
+	return nil
+}

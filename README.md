@@ -41,12 +41,21 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     - [x] Create a schema definition language parser
     - [x] Test it on some standard schema
     - [x] Make it generate type definitions for the graphql parser
-- [ ] Data structures
+- [x] Data structures
     - [x] design a parser data structure
-    - [ ] get the parser to produce it
+    - [x] get the parser to produce it
+- [ ] Generate a working query
+    - [x] Organize for use by clients
+    - [ ] Write some test queries and schema supporting them
+    - [ ] Begin defining a structure for writing query resolvers
+    - [ ] Build a server that can answer a simple query
 
 ## The worklog
 
+* Week of Dec 13
+    * I am now working on this "officially" as part of my job at Achievement Network. Not going to be maintaining this log as well, but should be making more regular progress. One of these days I'll update this readme to be more appropriate to the current status.
+    * Meanwhile, I now have a working parser that propagates the discovered queries up to the return value of the parser. So I can parse a schema and have the data structures to support it, then pass that schema on to the parser which can then read a query against that schema. Now I need to use that parsed object to actually do the query.
+    * This will require that I have a structure for building query resolvers. That's the next step.
 * Dec 4 - (5 hrs) - Sunday
     * I realized that ValueRegistry is really a Scope, so renamed it.
     * Now parser is using the type registry. It's not tested yet, and value assignment only code to work if types are identical. Lots more work to do but I want to start testing it.

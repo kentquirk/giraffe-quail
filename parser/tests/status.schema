@@ -1,0 +1,48 @@
+interface BasicStatus {
+    Name: String!
+    Address: String!
+    Port: String!
+    StatusCode: Int
+    ConfigType: String!
+    ConfigVersion: String!
+    DeployTag: String!
+    Revision: String!
+}
+
+type Service implements BasicStatus {
+    Name: String!
+    Address: String!
+    Port: String!
+    StatusCode: Int
+    ConfigType: String!
+    ConfigVersion: String!
+    DeployTag: String!
+    Revision: String!
+    Requests: RequestType
+    Errors: ErrorType
+    Uptime: String
+    Starttime: String
+}
+
+type RequestType {
+    Count: Int
+    Last5Min: Int
+    LastHour: Int
+}
+
+type ErrorType {
+    Server: Int
+    User: Int
+}
+
+enum Deploy { DEV, STAGING, PROD }
+
+type DeployStatus {
+    Services: [Service]
+}
+
+type Query {
+    statusAll($deploy: Deploy): DeployStatus
+    statusOne($deploy: Deploy, $name: String): Service
+    compare($name: String): [Service]
+}
