@@ -141,7 +141,7 @@ func TestUnion(t *testing.T) {
 }
 
 func TestPets(t *testing.T) {
-	_, _, err := LoadSchemaFromFile("tests/pets.schema")
+	_, _, err := LoadFile("tests/pets.schema")
 	if err != nil {
 		DumpErrors(err)
 	}

@@ -34,17 +34,28 @@ Definition <-
     )
 
 OperationDefinition <-
-    ( OperationType _ Name? VariableDefinitions? Directives? ss:SelectionSet {
-            return ss, nil
+    ( ot:OperationType _ n:Name? sc:VariableDefinitions? Directives? ss:SelectionSet {
+            vars, _ := sc.(*types.Scope)
+            return types.Operation{
+                Type: ot.(types.OpType),
+                Name: Str(n),
+                Variables: vars,
+                SelectionSet: ss.(types.SelectionSet),
+                }, nil
         }
     / ss:SelectionSet {
-            return ss, nil
+            return types.Operation{
+                Type: types.QUERY,
+                Name: "",
+                Variables: nil,
+                SelectionSet: ss.(types.SelectionSet),
+                }, nil
         }
     )
 
 OperationType <-
-    ( _ "query" { return "query", nil }
-    / _ "mutation" { return "mutation", nil }
+    ( _ "query" { return types.QUERY, nil }
+    / _ "mutation" { return types.MUTATION, nil }
     / _ n:Name { return n, c.NewError("Must be query or mutation.", "OT-1") }
     )
 

@@ -4,26 +4,20 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kentquirk/giraffe-quail/parser"
-	"github.com/kentquirk/giraffe-quail/types"
-	"github.com/kentquirk/giraffe-quail/typeschema"
+	"github.com/kentquirk/giraffe-quail/gql"
 )
 
 func main() {
-	// parser.TR = types.NewTypeRegistry()
-	// parser.GlobalScope = types.NewScope()
-	var err error
-
-	tr, gs, err := typeschema.LoadSchemaFromFile("../../parser/tests/starwars.schema")
+	gq, err := gql.FromFile("../../parser/tests/starwars.schema")
 	if err != nil {
 		fmt.Println("Error parsing schema." + err.Error())
 		os.Exit(1)
 	}
-	query, err := tr.Get("Query")
+	query, err := gq.Types.Get("Query")
 	for _, f := range query.Fields {
 		fmt.Println("f = ", f.N)
 	}
-	fmt.Println("gs = ", gs)
+	fmt.Println("s = ", gq.Scope)
 
 	qs := `query HeroNameQuery {
               hero {
@@ -31,14 +25,15 @@ func main() {
               }
             }
          `
-	qi, err := parser.Parse("querytest", []byte(qs))
+	ops, err := gq.ParseString("querytest", qs)
 	if err != nil {
 		fmt.Println("Error parsing query." + err.Error())
 		os.Exit(1)
 	}
-	qia := qi.([]interface{})
-	for _, q := range qia {
-		ss := q.(types.SelectionSet)
-		fmt.Println("ss = ", ss.Fields[0].Name)
+	gq.Register("hero", HeroHandler{"Luke"})
+	for _, op := range ops {
+		if err := gq.DoOp(op); err != nil {
+			fmt.Println(err)
+		}
 	}
 }

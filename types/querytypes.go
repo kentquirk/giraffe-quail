@@ -1,5 +1,12 @@
 package types
 
+type OpType string
+
+const (
+	QUERY    OpType = "query"
+	MUTATION OpType = "mutation"
+)
+
 type QueryField struct {
 	Name         string
 	Alias        string
@@ -9,4 +16,11 @@ type QueryField struct {
 
 type SelectionSet struct {
 	Fields []QueryField
+}
+
+type Operation struct {
+	Type         OpType
+	Name         string
+	Variables    *Scope
+	SelectionSet SelectionSet
 }

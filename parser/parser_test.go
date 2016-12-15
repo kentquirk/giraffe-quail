@@ -13,7 +13,7 @@ func TestMain(tm *testing.M) {
 	GlobalScope = types.NewScope()
 	var err error
 
-	TR, GlobalScope, err = typeschema.LoadSchemaFromFile("tests/starwars.schema")
+	TR, GlobalScope, err = typeschema.LoadFile("tests/starwars.schema")
 	if err != nil {
 		panic("Couldn't load schema: " + err.Error())
 	}
@@ -61,7 +61,7 @@ func TestStarwars(t *testing.T) {
 
 func TestStatus(t *testing.T) {
 	var err error
-	TR, GlobalScope, err = typeschema.LoadSchemaFromFile("tests/status.schema")
+	TR, GlobalScope, err = typeschema.LoadFile("tests/status.schema")
 	err = LoadQueryFromFile("tests/status.gql")
 	if err != nil {
 		DumpErrors(err)

@@ -22,3 +22,12 @@ func DumpErrors(err error) {
 		fmt.Printf("%+v\n", pe)
 	}
 }
+
+// Str tries to interpret an interface{} as a string;
+// if it succeeds, returns the string, if it fails, returns ""
+func Str(s interface{}) string {
+	if st, ok := s.(string); ok {
+		return st
+	}
+	return ""
+}
