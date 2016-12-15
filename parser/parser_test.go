@@ -51,6 +51,24 @@ func TestUnclosedQuote(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestComment(t *testing.T) {
+	s := `
+              # comment
+    query TestQuery {
+              # comment
+              Luke: human(id:"123")                 # comment
+
+              # comment
+            }
+              # comment
+    `
+	_, err := Parse("querytest", []byte(s))
+	if err != nil {
+		DumpErrors(err)
+	}
+	assert.Nil(t, err)
+}
+
 func TestStarwars(t *testing.T) {
 	err := LoadQueryFromFile("tests/starwars.gql")
 	if err != nil {

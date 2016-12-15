@@ -292,8 +292,8 @@ _ <- I*
 I "Ignored" <-
    ( UnicodeBOM
    / WhiteSpace
-   / LineTerminator
    / Comment
+   / LineTerminator
    / Comma
    )
 
@@ -312,7 +312,7 @@ LineTerminator "EOL" <-
     )
 
 WhiteSpace <- [ \t]
-Comment <- '#' .* !LineTerminator
+Comment <- ( '#' [^\r\n]*)
 Comma <- ','
 NegativeSign <- '-'
 Digit <- [0-9]

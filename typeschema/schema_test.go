@@ -140,6 +140,24 @@ func TestUnion(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestComment(t *testing.T) {
+	s := `
+              # comment
+    interface Pet2 {
+              # comment
+              name: String!                 # comment
+
+              # comment
+            }
+              # comment
+    `
+	_, err := Parse("schematest", []byte(s))
+	if err != nil {
+		DumpErrors(err)
+	}
+	assert.Nil(t, err)
+}
+
 func TestPets(t *testing.T) {
 	_, _, err := LoadFile("tests/pets.schema")
 	if err != nil {

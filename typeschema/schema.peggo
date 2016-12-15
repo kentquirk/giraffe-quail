@@ -167,8 +167,8 @@ _ <- I*
 I "Ignored" <-
    ( UnicodeBOM
    / WhiteSpace
-   / LineTerminator
    / Comment
+   / LineTerminator
    / Comma
    )
 
@@ -184,7 +184,7 @@ LineTerminator "EOL" <-
     )
 
 WhiteSpace <- [ \t]
-Comment <- '#' .* !LineTerminator
+Comment <- ( '#' [^\r\n]*)
 Comma <- ','
 Name <- [_A-Za-z][_0-9A-Za-z]* { return string(c.text), nil }
 
