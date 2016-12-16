@@ -18,7 +18,7 @@ type GQ struct {
 
 // Handler is an interface that is used to execute queries
 type Handler interface {
-	Operate(global, local *types.Scope) error
+	Operate(field types.QueryField, global, local *types.Scope) error
 }
 
 func New(t *types.TypeRegistry, s *types.Scope) *GQ {
@@ -35,18 +35,13 @@ func FromFile(filename string) (*GQ, error) {
 	return New(tr, gs), err
 }
 
-func (gq *GQ) ParseString(name string, qs string) ([]types.Operation, error) {
+func (gq *GQ) ParseString(name string, qs string) (*types.Document, error) {
 	qi, err := parser.Parse(name, []byte(qs))
 	if err != nil {
 		fmt.Println("Error parsing query." + err.Error())
-		return nil, err
+		return types.NewDocument(), err
 	}
-	ops := make([]types.Operation, 0)
-	qia := qi.([]interface{})
-	for _, q := range qia {
-		ops = append(ops, q.(types.Operation))
-	}
-	return ops, nil
+	return qi.(*types.Document), nil
 }
 
 // Register stores the handler
@@ -58,7 +53,7 @@ func (gq *GQ) Register(name string, h Handler) error {
 // DoOp processes an individual operation
 // Not to be confused with Doo Wop, which is a genre of pop music characterized
 // by close harmony and nonsense syllables.
-func (gq *GQ) DoOp(op types.Operation) error {
+func (gq *GQ) DoOp(op *types.Operation) error {
 	switch op.Type {
 	case types.QUERY:
 		for _, f := range op.SelectionSet.Fields {
@@ -67,7 +62,8 @@ func (gq *GQ) DoOp(op types.Operation) error {
 			if !ok {
 				return errors.New("No handler found for " + f.Name)
 			}
-			err := h.Operate(gq.Scope, op.Variables)
+			fmt.Printf("f:%#v\n", f)
+			err := h.Operate(f, gq.Scope, op.Variables)
 			if err != nil {
 				return err
 			}
@@ -78,4 +74,15 @@ func (gq *GQ) DoOp(op types.Operation) error {
 	default:
 		return errors.New("DoOp: Don't know about " + string(op.Type))
 	}
+}
+
+// DoOps processes a collection of operations
+func (gq *GQ) DoOps(doc *types.Document) error {
+	for _, op := range doc.Operations {
+		fmt.Printf("%v\n", op)
+		if err := gq.DoOp(op); err != nil {
+			return err
+		}
+	}
+	return nil
 }

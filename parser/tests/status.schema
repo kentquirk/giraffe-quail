@@ -3,10 +3,10 @@ interface BasicStatus {
     Address: String!
     Port: String!
     StatusCode: Int
-    ConfigType: String!
-    ConfigVersion: String!
-    DeployTag: String!
-    Revision: String!
+    configtype: String!
+    configversion: String!
+    deploytag: String!
+    revision: String!
 }
 
 type Service implements BasicStatus {
@@ -14,25 +14,25 @@ type Service implements BasicStatus {
     Address: String!
     Port: String!
     StatusCode: Int
-    ConfigType: String!
-    ConfigVersion: String!
-    DeployTag: String!
-    Revision: String!
-    Requests: RequestType
-    Errors: ErrorType
-    Uptime: String
-    Starttime: String
+    configtype: String!
+    configversion: String!
+    deploytag: String!
+    revision: String!
+    requests: RequestType
+    errors: ErrorType
+    uptime: String
+    starttime: String
 }
 
 type RequestType {
-    Count: Int
-    Last5Min: Int
-    LastHour: Int
+    count: Int
+    last5min: Int
+    lasthour: Int
 }
 
 type ErrorType {
-    Server: Int
-    User: Int
+    server: Int
+    user: Int
 }
 
 enum Deploy { DEV, STAGING, PROD }
@@ -42,7 +42,9 @@ type DeployStatus {
 }
 
 type Query {
-    statusAll($deploy: Deploy): DeployStatus
-    statusOne($deploy: Deploy, $name: String): Service
-    compare($name: String): [Service]
+    status: [Service]
+#    statusAll($deploy: Deploy): DeployStatus
+#    statusAll($deploy: Deploy): DeployStatus
+#    statusOne($deploy: Deploy, $name: String): Service
+#    compare($name: String): [Service]
 }

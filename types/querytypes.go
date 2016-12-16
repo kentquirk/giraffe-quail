@@ -24,3 +24,34 @@ type Operation struct {
 	Variables    *Scope
 	SelectionSet SelectionSet
 }
+
+type Fragment struct {
+}
+
+// Definition just exists long enough to carry either an Operation or a Fragment
+// to a Document in the parser
+type Definition struct {
+	Op   *Operation
+	Frag *Fragment
+}
+
+type Document struct {
+	Operations []*Operation
+	Fragments  []*Fragment
+}
+
+func NewDocument() *Document {
+	return &Document{
+		Operations: make([]*Operation, 0),
+		Fragments:  make([]*Fragment, 0),
+	}
+}
+
+func (doc *Document) Add(def Definition) {
+	if def.Op != nil {
+		doc.Operations = append(doc.Operations, def.Op)
+	}
+	if def.Frag != nil {
+		doc.Fragments = append(doc.Fragments, def.Frag)
+	}
+}

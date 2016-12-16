@@ -22,32 +22,39 @@
 // Documents
 Document <-
     ( defs:Definition+ _ EOF {
-            return defs, nil
+            all := types.NewDocument()
+            for _, def := range defs.([]interface{}) {
+                all.Add(def.(types.Definition))
+            }
+            return all, nil
         }
     )
 
 Definition <-
-    ( FragmentDefinition
+    ( frag:FragmentDefinition {
+            // return types.Definition{Frag:frag.(*types.Fragment)}, nil
+            return types.Definition{}, nil
+        }
     / op:OperationDefinition {
-            return op, nil
+            return types.Definition{Op:op.(*types.Operation)}, nil
         }
     )
 
 OperationDefinition <-
-    ( ot:OperationType _ n:Name? sc:VariableDefinitions? Directives? ss:SelectionSet {
-            vars, _ := sc.(*types.Scope)
-            return types.Operation{
-                Type: ot.(types.OpType),
-                Name: Str(n),
-                Variables: vars,
-                SelectionSet: ss.(types.SelectionSet),
-                }, nil
-        }
-    / ss:SelectionSet {
-            return types.Operation{
+    ( ss:SelectionSet {
+            return &types.Operation{
                 Type: types.QUERY,
                 Name: "",
                 Variables: nil,
+                SelectionSet: ss.(types.SelectionSet),
+                }, nil
+        }
+    / ot:OperationType _ n:Name? sc:VariableDefinitions? Directives? ss:SelectionSet {
+            vars, _ := sc.(*types.Scope)
+            return &types.Operation{
+                Type: ot.(types.OpType),
+                Name: Str(n),
+                Variables: vars,
                 SelectionSet: ss.(types.SelectionSet),
                 }, nil
         }
@@ -123,9 +130,9 @@ FragmentSpread <- _ "..." FragmentName Directives?
 
 FragmentDefinition <- _ "fragment" FragmentName TypeCondition Directives? SelectionSet
 
-FragmentName <- _ Name    // but not 'on'
-
 TypeCondition <- _ "on" _ NamedType
+
+FragmentName <- _ Name    // but not 'on'
 
 InlineFragment <- _ "..." TypeCondition? Directives? SelectionSet
 
