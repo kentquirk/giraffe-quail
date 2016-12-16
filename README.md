@@ -62,6 +62,8 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     * Now parser is using the type registry. It's not tested yet, and value assignment only code to work if types are identical. Lots more work to do but I want to start testing it.
     * Imported the Star Wars schema from the FB examples; it loaded right away.
     * Created a small test framework and loaded my test file from it. It too worked, once I imported the starwars schema.
+    * Add a document datatype to reflect proper graphql structure. Now getting into the nitty-gritty of the semantics of a query.
+    * Implement a sample query to our status endpoint that actually kinda works.
 
 * Dec 3 - (4 hrs) - Saturday
     * Now have a type registry and a value registry that I'm pretty happy with
