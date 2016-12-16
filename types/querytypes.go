@@ -12,6 +12,7 @@ type QueryField struct {
 	Alias        string
 	Arguments    *Scope
 	SelectionSet SelectionSet
+	Directives   []*Directive
 }
 
 type SelectionSet struct {
@@ -23,9 +24,15 @@ type Operation struct {
 	Name         string
 	Variables    *Scope
 	SelectionSet SelectionSet
+	Directives   []*Directive
 }
 
 type Fragment struct {
+}
+
+type Directive struct {
+	Name      string
+	Arguments *Scope
 }
 
 // Definition just exists long enough to carry either an Operation or a Fragment

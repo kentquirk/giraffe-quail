@@ -49,12 +49,14 @@ OperationDefinition <-
                 SelectionSet: ss.(types.SelectionSet),
                 }, nil
         }
-    / ot:OperationType _ n:Name? sc:VariableDefinitions? Directives? ss:SelectionSet {
+    / ot:OperationType _ n:Name? sc:VariableDefinitions? dirs:Directives? ss:SelectionSet {
             vars, _ := sc.(*types.Scope)
+            directives, _ := args.([]*types.Directive)
             return &types.Operation{
                 Type: ot.(types.OpType),
                 Name: Str(n),
                 Variables: vars,
+                Directives: directives,
                 SelectionSet: ss.(types.SelectionSet),
                 }, nil
         }
@@ -93,16 +95,18 @@ Selection <-
     / InlineFragment { return types.SelectionSet{}, nil } // should error
     )
 
-Field <- a:Alias? _ n:Name args:Arguments? Directives? ss:SelectionSet? {
+Field <- a:Alias? _ n:Name args:Arguments? dirs:Directives? ss:SelectionSet? {
         name, _ := n.(string)
         alias, _ := a.(string)
         selset, _ := ss.(types.SelectionSet)
         arguments, _ := args.(*types.Scope)
+        directives, _ := args.([]*types.Directive)
         f := types.QueryField {
             Name: name,
             Alias: alias,
             Arguments: arguments,
             SelectionSet: selset,
+            Directives: directives,
         }
         return f, nil
     }
@@ -280,9 +284,22 @@ NonNullType <-
     )
 
 // Directives
-Directives <- Directive+
+Directives <- dirs:Directive+ {
+    all := make([]*types.Directive, 0)
+    for _, d := range dirs.([]interface{}) {
+        all = append(all, d.(*types.Directive)
+    }
 
-Directive <- _ '@' Name _ Arguments?
+Directive <- _ '@' n:Name _ args:Arguments? {
+        name, _ := n.(string)
+        arguments, _ := args.(*types.Scope)
+        d := &types.Directive {
+            Name: name,
+            Arguments: arguments,
+        }
+        return d, nil
+    }
+
 
 
 // Lexical Tokens:
