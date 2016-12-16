@@ -57,13 +57,14 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     * Meanwhile, I now have a working parser that propagates the discovered queries up to the return value of the parser. So I can parse a schema and have the data structures to support it, then pass that schema on to the parser which can then read a query against that schema. Now I need to use that parsed object to actually do the query.
     * This will require that I have a structure for building query resolvers. That's the next step.
     * Have a simple test app that can resolve a query and return its results. The API is starting to look like something I'd be willing to deploy.
+    * Add a document datatype to reflect proper graphql structure. Now getting into the nitty-gritty of the semantics of a query.
+    * Implement a sample query to our status endpoint that actually kinda works.
+
 * Dec 4 - (5 hrs) - Sunday
     * I realized that ValueRegistry is really a Scope, so renamed it.
     * Now parser is using the type registry. It's not tested yet, and value assignment only code to work if types are identical. Lots more work to do but I want to start testing it.
     * Imported the Star Wars schema from the FB examples; it loaded right away.
     * Created a small test framework and loaded my test file from it. It too worked, once I imported the starwars schema.
-    * Add a document datatype to reflect proper graphql structure. Now getting into the nitty-gritty of the semantics of a query.
-    * Implement a sample query to our status endpoint that actually kinda works.
 
 * Dec 3 - (4 hrs) - Saturday
     * Now have a type registry and a value registry that I'm pretty happy with
