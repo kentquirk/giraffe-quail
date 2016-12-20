@@ -51,7 +51,7 @@ OperationDefinition <-
         }
     / ot:OperationType _ n:Name? sc:VariableDefinitions? dirs:Directives? ss:SelectionSet {
             vars, _ := sc.(*types.Scope)
-            directives, _ := args.([]*types.Directive)
+            directives, _ := dirs.([]*types.Directive)
             return &types.Operation{
                 Type: ot.(types.OpType),
                 Name: Str(n),
@@ -287,8 +287,10 @@ NonNullType <-
 Directives <- dirs:Directive+ {
     all := make([]*types.Directive, 0)
     for _, d := range dirs.([]interface{}) {
-        all = append(all, d.(*types.Directive)
+        all = append(all, d.(*types.Directive))
     }
+    return all, nil
+}
 
 Directive <- _ '@' n:Name _ args:Arguments? {
         name, _ := n.(string)
