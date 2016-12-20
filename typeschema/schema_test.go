@@ -165,3 +165,11 @@ func TestPets(t *testing.T) {
 	}
 	assert.Nil(t, err)
 }
+
+func TestADS(t *testing.T) {
+	_, _, err := LoadFile("tests/ads.schema")
+	if err != nil {
+		DumpErrors(err)
+	}
+	assert.Nil(t, err)
+}

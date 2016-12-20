@@ -1,0 +1,101 @@
+type Query {
+  assessmentList: [Assessment]!
+  userAssessment(id: String!): UserAssessment!
+}
+type Item {
+  id: String!
+  grade: String
+  subject: String
+  passage: Passage
+  fulltext: String
+  stem: String
+  questions: [Question]
+  hasCalculator: Boolean
+  hasProtractor: Boolean
+  hasFormula: Boolean
+  audioSrc: [String]
+  videoSrc: [String]
+}
+type ItemUsage {
+  id: String!
+  item: Item
+  directions: [Direction]
+}
+type Direction {
+  id: String!
+  text: String
+  subject: String
+  grade: String
+}
+type Passage {
+  id: String!
+  author: String
+  content: String
+  fulltext: String
+  creditline: String
+  imprint: String
+  lastedit: String
+  lexile: String
+  modified: String
+  modifiedby: String
+  notes: String
+  publisher: String
+  purpose: String
+  rmm: String
+  title: String
+  wordcount: Int
+}
+type Section {
+  id: String!
+  defaultDuration: Int
+  itemUsages: [ItemUsage]
+  directions: [Direction]
+}
+type Assessment {
+  id: String!
+  name: String
+  grade: String
+  sections: [Section]
+  directions: [Direction]
+}
+type UserAssessment {
+  activityId: String
+  userId: String
+  sessionId: String
+  assessment: Assessment
+  responses: AssessmentResponseSession
+}
+type Question {
+  id: String!
+  notes: String
+  partofstandard: String
+  points: String
+  difficulty: String
+  learnosityQuestionJSON: String
+}
+type AssessmentResponseSession {
+  userId: ID!
+  activityId: ID!
+  numAttempted: Int
+  numQuestions: Int
+  sessionId: ID!
+  score: Int
+  maxScore: Int
+  sessionDuration: Int
+  status: String
+  dtStarted: String
+  dtCompleted: String
+  responses: [QuestionResponse]
+  metadata: [AssessmentResponseSessionMetadata]
+}
+type QuestionResponse {
+  responseId: ID!
+  questionType: String
+  automarkable: Boolean
+  attempted: Boolean
+  score: Int
+  maxScore: Int
+}
+type AssessmentResponseSessionMetadata {
+  userAgent: String
+}

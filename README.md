@@ -52,6 +52,9 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
 
 ## The worklog
 
+* Week of Dec 20
+    * Add schema from a real app we're building. Nothing complex, but it's in active use for a Node-based GraphQL implementation.
+
 * Week of Dec 13
     * I am now working on this "officially" as part of my job at Achievement Network. Not going to be maintaining this log as well, but should be making more regular progress. One of these days I'll update this readme to be more appropriate to the current status.
     * Meanwhile, I now have a working parser that propagates the discovered queries up to the return value of the parser. So I can parse a schema and have the data structures to support it, then pass that schema on to the parser which can then read a query against that schema. Now I need to use that parsed object to actually do the query.
@@ -59,6 +62,7 @@ So...I have a month, I have a spec, I really believe that a good GraphQL server 
     * Have a simple test app that can resolve a query and return its results. The API is starting to look like something I'd be willing to deploy.
     * Add a document datatype to reflect proper graphql structure. Now getting into the nitty-gritty of the semantics of a query.
     * Implement a sample query to our status endpoint that actually kinda works.
+    * Allow the data for directives to flow all the way through to the Operation and Field objects.
 
 * Dec 4 - (5 hrs) - Sunday
     * I realized that ValueRegistry is really a Scope, so renamed it.
